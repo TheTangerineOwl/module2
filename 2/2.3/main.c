@@ -55,25 +55,39 @@ int div(double* res, int argc, ...)
 	return 0;
 }
 
+struct {
+    const char *str;
+    int (*op) (double*, int, ...);
+} operations[] = {
+    {"Sum", sum},
+    {"Subtract", sub},
+    {"Multiply", mult},
+    {"Divide", div}
+};
 
 int main() {
-	int choice;
-	int argNum;
+	int choice, argNum;
+    double res, good;
+    int operationsCount = sizeof(operations) / sizeof(operations[0]);
 
 	while (1) {
 
 		printf("Choose an operation:\n");
-		printf("1. Sum;\n");
-		printf("2. Subtract;\n");
-		printf("3. Multiply;\n");
-		printf("4. Divide.\nYour choice: ");
+		for (size_t j = 0; j < operationsCount; j++)
+            printf("%ld. %s;\n", j + 1, operations[j].str);
+        printf("%d. Exit.\n", operationsCount + 1);
+		printf("Your choice: ");
 		scanf("%d", &choice);
 
-		if (choice < 1 || choice > 4)
+		if (choice == operationsCount + 1)
+            return 0;
+        else if (choice < 1 || choice > operationsCount + 1)
 		{
 			printf("Incorrect choice! Try again.\n");
 			continue;
 		}
+
+		int (*op) (double*, int, ...) = operations[choice - 1].op;
 
 		printf("Enter number of arguments: ");
 		while (!scanf("%d", &argNum) || argNum < 1 || argNum > MAX_ARGS)
@@ -86,31 +100,6 @@ int main() {
 			printf("Enter number %d: ", i + 1);
 			scanf("%lf", &nums[i]);
 		}
-
-		int (*op) (double*, int, ...);
-
-		switch (choice)
-		{
-		case 2:
-		{
-			op = sub;
-		} break;
-		case 3:
-		{
-			op = mult;
-		} break;
-		case 4:
-		{
-			op = div;
-		} break;
-		default:
-		{
-			op = sum;
-		} break;
-		}
-
-		double res;
-		int good;
 
 		switch (argNum)
 		{
@@ -134,9 +123,6 @@ int main() {
 		}
 		}
 
-		if (good != -1)
-			printf("Result: %lf\n", res);
-		else
-			printf("Error!\n");
+        good != -1 ? printf("Result: %lf\n", res) : printf("Error!\n");
 	}
 }
