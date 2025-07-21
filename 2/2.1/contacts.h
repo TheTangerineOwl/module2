@@ -1,7 +1,7 @@
 #ifndef CONTACTS_H
 #define CONTACTS_H
 
-#define NAME_PERSON_LENGTH 256
+#define NAME_PERSON_LENGTH 50
 #define NAME_COMPANY_LENGTH 256
 #define MAX_EMAIL_LENGTH 256
 #define PHONE_NUMBER_LENGTH 12
@@ -37,7 +37,7 @@ typedef struct
 
 extern int contactsCount;
 
-int addContact(
+Contact_t* addContact(
     Contact_t* contacts,
     const char* lastName,
     const char* firstName,
@@ -55,6 +55,21 @@ int addContact(
 int deleteContact(
     Contact_t* contacts,
     int index
+);
+
+Contact_t* editContact(
+    Contact_t* contact,
+    const char* lastName,
+    const char* firstName,
+    const char* patronim,
+    const char* workPlace,
+    const char* position,
+    const char* workPhone,
+    const char* personalPhone,
+    const char* homePhone,
+    const char* extraPhone,
+    char** emails,
+    char** socials
 );
 
 #endif

@@ -2,6 +2,8 @@
 #include <string.h>
 #include "contacts.h"
 
+int contactsCount = 0;
+
 void printContact(const Contact_t contact)
 {
     printf("Фамилия: %s\n", contact.lastName);
@@ -38,12 +40,41 @@ void printAllContacts(const Contact_t* contacts)
     }
 }
 
-int contactsCount = 0;
+int enterContactInfo(Contact_t* contacts)
+{
+    if (contactsCount + 1 > MAX_CONTACTS_COUNT)
+    {
+        printf("Нельзя добавить контакт!\n");
+        return 0;
+    }
+    char lastName[NAME_PERSON_LENGTH];
+    char firstName[NAME_PERSON_LENGTH];
+    char patronim[NAME_PERSON_LENGTH];
+    char work[PHONE_NUMBER_LENGTH];
+    char personal[PHONE_NUMBER_LENGTH];
+    char home[PHONE_NUMBER_LENGTH];
+    char extra[PHONE_NUMBER_LENGTH];
+    char workPlace[NAME_COMPANY_LENGTH];
+    char position[NAME_COMPANY_LENGTH];
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH];
+    char socialsLink[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH];
+    printf("Введите фамилию: ");
+    // while (!scanf("%s", lastName) || strlen(lastName) == 0)
+    while (!fgets(lastName, NAME_PERSON_LENGTH, stdin) || strlen(lastName) == 0)
+        printf("Некорректный ввод! Попробуйте еще раз: ");
+    printf("Введите имя: ");
+    while (!fgets(firstName, NAME_PERSON_LENGTH, stdin) || strlen(firstName) == 0)
+    // while (!scanf("%s", firstName) || strlen(firstName) == 0)
+        printf("Некорректный ввод! Попробуйте еще раз: ");
+    printf("%s\n", lastName);
+    printf("%s\n", firstName);
+    return 1;
+}
 
 int main()
 {
     Contact_t contacts[MAX_CONTACTS_COUNT];
-    
+    enterContactInfo(contacts);
     strncpy(contacts[0].lastName, "lastName", NAME_PERSON_LENGTH);
     strncpy(contacts[0].firstName, "firstName", NAME_PERSON_LENGTH);
     strncpy(contacts[0].patronim, "patronim", NAME_PERSON_LENGTH);
@@ -73,18 +104,27 @@ int main()
 
     contactsCount++;
     char* emails[MAX_EMAIL_LENGTH] = { "wavydavy@foodgram.ru", "isonfire@mail.ru" };
-    int res = addContact(contacts,
+    char* socials[SOCIALS_LINK_LENGTH] = { "tg.com/l0", "vk.ru/id0", "contact.ru/contact" };
+    Contact_t* res = addContact(contacts,
         "Wavy", "Davy",
         "Isonfire", "APAC", "soldier",
         "88005555335",
         "88889993333",
-        NULL, NULL,
+        "123445", "89993334444",
         emails,
-        NULL
+        socials
     );
-    //printContact(contacts[0]);
-    //printContact(contacts[1]);
     printf("Все контакты: \n");
+    printAllContacts(contacts);
+    printf("Редактирование: \n");
+    editContact(
+        &contacts[1],
+        "Wavvyyyy", "Davyyy",
+        "Isonfireee", NULL,
+        NULL, NULL,
+        NULL, NULL, NULL,
+        NULL, NULL
+    );
     printAllContacts(contacts);
     deleteContact(contacts, 0);
     printf("После удаления: \n");
