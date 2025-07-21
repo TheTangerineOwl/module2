@@ -58,16 +58,27 @@ int enterContactInfo(Contact_t* contacts)
     char position[NAME_COMPANY_LENGTH];
     char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH];
     char socialsLink[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH];
+
     printf("Введите фамилию: ");
-    // while (!scanf("%s", lastName) || strlen(lastName) == 0)
-    while (!fgets(lastName, NAME_PERSON_LENGTH, stdin) || strlen(lastName) == 0)
+    while (!scanf("%s", lastName) || strlen(lastName) == 0)
         printf("Некорректный ввод! Попробуйте еще раз: ");
+    lastName[NAME_PERSON_LENGTH - 1] = '\0';
+    fflush(stdin);
+
     printf("Введите имя: ");
-    while (!fgets(firstName, NAME_PERSON_LENGTH, stdin) || strlen(firstName) == 0)
-    // while (!scanf("%s", firstName) || strlen(firstName) == 0)
+    while (!scanf("%s", firstName) || strlen(firstName) == 0)
         printf("Некорректный ввод! Попробуйте еще раз: ");
-    printf("%s\n", lastName);
-    printf("%s\n", firstName);
+    firstName[NAME_PERSON_LENGTH - 1] = '\0';
+    fflush(stdin);
+
+    printf("Введите отчество (пустая строка для пропуска): ");  // пустая строка не оканчивает ввод, пофиксить
+    while (!scanf("%s", firstName))
+        printf("Некорректный ввод! Попробуйте еще раз: ");
+    patronim[NAME_PERSON_LENGTH - 1] = '\0';
+    fflush(stdin);
+
+    //printf("%s\n", lastName);
+    //printf("%s\n", firstName);
     return 1;
 }
 
@@ -75,34 +86,14 @@ int main()
 {
     Contact_t contacts[MAX_CONTACTS_COUNT];
     enterContactInfo(contacts);
-    strncpy(contacts[0].lastName, "lastName", NAME_PERSON_LENGTH);
-    strncpy(contacts[0].firstName, "firstName", NAME_PERSON_LENGTH);
-    strncpy(contacts[0].patronim, "patronim", NAME_PERSON_LENGTH);
-    strncpy(contacts[0].workInfo.workPlace, "workPlace", NAME_COMPANY_LENGTH);
-    strncpy(contacts[0].workInfo.position, "position", NAME_COMPANY_LENGTH);
-    strncpy(contacts[0].numbers.work, "workPhone", PHONE_NUMBER_LENGTH);
-    strncpy(contacts[0].numbers.personal, "persPhone", PHONE_NUMBER_LENGTH);
-    strncpy(contacts[0].numbers.home, "homePhone", PHONE_NUMBER_LENGTH);
-    strncpy(contacts[0].numbers.extra, "extraPhone", PHONE_NUMBER_LENGTH);
-    if (contacts[0].emails)
-    {
-        //char** email = contacts[0].emails;
-        for (size_t i = 0; i < MAX_EMAILS_COUNT - 3; i++)
-        {
-            strncpy(contacts[0].emails[i], "1", MAX_EMAIL_LENGTH);
-            // *email++;
-        }
-    }
-    if (contacts[0].socialsLink)
-    {
-        //char** social = contacts[0].socialsLink;
-        for (size_t j = 0; j < MAX_SOCIALS_COUNT - 3; j++)
-        {
-            strncpy(contacts[0].socialsLink[j], "2", SOCIALS_LINK_LENGTH);
-        }
-    }
-
-    contactsCount++;
+    addContact(
+        contacts,
+        "lastName", "firstName", "patronim",
+        "workPlace", "position",
+        "83334445555", "89994449999",
+        "123456", "87776665555",
+        NULL, NULL
+    );
     char* emails[MAX_EMAIL_LENGTH] = { "wavydavy@foodgram.ru", "isonfire@mail.ru" };
     char* socials[SOCIALS_LINK_LENGTH] = { "tg.com/l0", "vk.ru/id0", "contact.ru/contact" };
     Contact_t* res = addContact(contacts,
