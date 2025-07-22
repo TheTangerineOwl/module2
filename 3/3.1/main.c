@@ -17,6 +17,25 @@ chmod). При этом отображается буквенное, цифро�
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-        printMode(argv[1]);
+    // if (argc == 2)
+    //     printMode(argv[1]);
+    if (argc < 2)
+        return 0;
+    char* flag = argv[1];
+    if (strncmp(flag, "--file", 7) == 0 && argc > 2)
+    {
+        char* filename = argv[2];
+        printFileMode(filename);
+    }
+    else if (strncmp(flag, "--print-mode", 13) == 0 && argc > 2)
+    {
+        char* strMode = argv[2];
+        __mode_t mode;
+        if (!sscanf(strMode, "%o", &mode) && !convertToMode(strMode, &mode))
+        {
+            printf("Couldn't convert mode!\n");
+            return 1;
+        }
+        printMode(mode);
+    }
 }
