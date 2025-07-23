@@ -6,7 +6,7 @@ __mode_t getMode(const char* filename)
     
     if (stat(filename, &buffer))
     {
-        puts("Error reading file mode!");
+        puts("Ошибка чтения режима файла!");
         return 0;
     }
 
@@ -35,7 +35,7 @@ int convertToMode(const char* strMode, __mode_t* result)
     __mode_t res = 0;
     if (strlen(strMode) < 9)
     {
-        printf("Incorrect permissions!\n");
+        printf("Некорректная запись режима!\n");
         return 0;
     }
     if (strMode[0] == 'r') res |= S_IRUSR;
@@ -91,7 +91,7 @@ int parseOption(char* option, __mode_t* mode)
     int flagUGO = 0, flagOP = 0, flagPERM = 0;
     if (!mode)
     {
-        puts("Can't get initial permission mode!\n");
+        puts("Не удалось получить предыдущий режим!\n");
         return 0;
     }
     while (*c)
@@ -139,7 +139,7 @@ int parseOption(char* option, __mode_t* mode)
         case '=':
             if (flagOP)
             {
-                printf("More than one operation in %s!\n", option);
+                printf("Больше одной операции в %s!\n", option);
                 return 0;
             }
             if (flagUGO && !flagPERM)
@@ -155,11 +155,11 @@ int parseOption(char* option, __mode_t* mode)
             }
             else
             {
-                printf("Incorrect format of option %s! %d%d%d\n", option, flagUGO, flagOP, flagPERM);
+                printf("Некорректный формат опции %s!\n", option);
                 return 0;
             }
         default:
-            printf("Incorrect symbol %c in option %s!\n", *c, option);
+            printf("Некорректный символ %c в опции %s!\n", *c, option);
             return 0;
         }
         *c++;
@@ -186,13 +186,7 @@ int parseOption(char* option, __mode_t* mode)
 int parseChmod(const int argc, char* argv[])
 {
     __mode_t mode;
-    if (argc == 4 && sscanf(argv[3], "%o", &mode))
-    {
-        puts("New mode: ");
-        printMode(mode);
-        return 1;
-    }
-    else
+    if (argc != 4 || !sscanf(argv[2], "%o", &mode))
     {
         mode = getMode(argv[argc - 1]);
         for (size_t i = 2; i < argc - 1; i++)
@@ -200,8 +194,8 @@ int parseChmod(const int argc, char* argv[])
             if (!parseOption(argv[i], &mode))
                 return 0;
         }
-        puts("New mode: ");
-        printMode(mode);
     }
+    puts("Новый режим: ");
+    printMode(mode);
     return 1;
 }

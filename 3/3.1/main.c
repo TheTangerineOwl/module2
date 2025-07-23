@@ -7,12 +7,12 @@ int main(int argc, char* argv[])
     char* flag = argv[1];
     if (argc == 2)
         printFileMode(flag);
-    else if (strncmp(flag, "--file", 7) == 0)
+    else if (strcmp(flag, "--file") == 0)
     {
         char* filename = argv[2];
         printFileMode(filename);
     }
-    else if (strncmp(flag, "--print-mode", 13) == 0)
+    else if (strcmp(flag, "--print-mode") == 0)
     {
         char* strMode = argv[2];
         __mode_t mode;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         }
         printMode(mode);
     }
-    else if (strncmp(flag, "--chmod", 8) == 0)
+    else if (strcmp(flag, "--chmod") == 0)
     {
         if (argc < 4)
         {
