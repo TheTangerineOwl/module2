@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
         __mode_t mode;
         if (!sscanf(strMode, "%o", &mode) && !convertToMode(strMode, &mode))
         {
-            printf("Couldn't convert mode!\n");
+            printf("Не удалось конвертировать режим!\n");
             return 1;
         }
         printMode(mode);
@@ -27,14 +27,14 @@ int main(int argc, char* argv[])
     {
         if (argc < 4)
         {
-            puts("Not enough arguments!");
+            puts("Недостаточно аргументов! Использование: --chmod mode... filename");
             return 1;
         }
         char* filename = argv[argc - 1];
         printFileMode(filename);
         if (!parseChmod(argc, argv))
         {
-            puts("Couldn't parse chmod options!");
+            puts("Не удалось конвертировать опции chmod!");
             return 1;
         }
     }
