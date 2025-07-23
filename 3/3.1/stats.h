@@ -10,5 +10,7 @@ void printBinary(const __mode_t mode);
 void printMode(const __mode_t mode);
 void printFileMode(const char* filename);
 int convertToMode(const char* strMode, __mode_t* result);
+int parseOption(char* option, __mode_t* mode);
+int parseChmod(const int argc, char* argv[]);
 
 #endif

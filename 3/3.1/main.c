@@ -1,33 +1,18 @@
 #include "stats.h"
-/*
-Написать программу для расчета маски прав доступа к файлу.
-1)Пользователь может ввести права доступа в буквенном или цифровом
-обозначении, ему должно быть показано соответствующее битовое
-представление.
-2)Пользователь может ввести имя файла, и ему отобразится буквенное,
-цифровое и битовое представление прав доступа. Использовать функцию stat
-для получения информации о файле. Сравнить результат с выводом,
-например, ls -l.
-3)Пользователь может изменить права доступа, определенные в первом или
-втором пункте, введя команды модификации атрибутов (подобно команде
-chmod). При этом отображается буквенное, цифровое и битовое
-представление прав доступа. Изменение прав доступа не нужно применять к
-файлу.
-*/
 
 int main(int argc, char* argv[])
 {
-    // if (argc == 2)
-    //     printMode(argv[1]);
     if (argc < 2)
         return 0;
     char* flag = argv[1];
-    if (strncmp(flag, "--file", 7) == 0 && argc > 2)
+    if (argc == 2)
+        printFileMode(flag);
+    else if (strncmp(flag, "--file", 7) == 0)
     {
         char* filename = argv[2];
         printFileMode(filename);
     }
-    else if (strncmp(flag, "--print-mode", 13) == 0 && argc > 2)
+    else if (strncmp(flag, "--print-mode", 13) == 0)
     {
         char* strMode = argv[2];
         __mode_t mode;
@@ -37,5 +22,20 @@ int main(int argc, char* argv[])
             return 1;
         }
         printMode(mode);
+    }
+    else if (strncmp(flag, "--chmod", 8) == 0)
+    {
+        if (argc < 4)
+        {
+            puts("Not enough arguments!");
+            return 1;
+        }
+        char* filename = argv[argc - 1];
+        printFileMode(filename);
+        if (!parseChmod(argc, argv))
+        {
+            puts("Couldn't parse chmod options!");
+            return 1;
+        }
     }
 }
