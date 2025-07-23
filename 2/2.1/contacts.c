@@ -1,7 +1,43 @@
-#include <string.h>
 #include "contacts.h"
 
-#include <stdio.h>
+Contact_t* copyContactInfo(
+    Contact_t* contact,
+    const char* lastName,
+    const char* firstName,
+    const char* patronim,
+    const char* workPlace,
+    const char* position,
+    const char* workPhone,
+    const char* personalPhone,
+    const char* homePhone,
+    const char* extraPhone,
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]   
+)
+{
+    if (lastName == NULL || firstName == NULL)
+        return NULL;
+    strncpy(contact->lastName, lastName, LAST_NAME_LENGTH - 1);
+    strncpy(contact->firstName, firstName, FIRST_NAME_LENGTH - 1);
+    if (patronim) strncpy(contact->patronim, patronim, PATRONIM_LENGTH - 1);
+    if (workPlace) strncpy(contact->workInfo.workPlace, workPlace, COMPANY_NAME_LENGTH) - 1;
+    if (position) strncpy(contact->workInfo.position, position, POSITION_LENGTH - 1);
+    if (workPhone) strncpy(contact->numbers.work, workPhone, PHONE_NUMBER_LENGTH - 1);
+    if (personalPhone) strncpy(contact->numbers.personal, personalPhone, PHONE_NUMBER_LENGTH - 1);
+    if (homePhone) strncpy(contact->numbers.home, homePhone, PHONE_NUMBER_LENGTH - 1);
+    if (extraPhone) strncpy(contact->numbers.extra, extraPhone, PHONE_NUMBER_LENGTH - 1);
+    if (emails)
+    {
+        for (size_t i = 0; i < MAX_EMAILS_COUNT; i++)
+            strncpy(contact->emails[i], emails[i], MAX_EMAIL_LENGTH - 1);
+    }
+    if (socials)
+    {
+        for (size_t j = 0; j < MAX_SOCIALS_COUNT; j++)
+            strncpy(contact->socialsLink[j], socials[j], SOCIALS_LINK_LENGTH - 1);
+    }
+    return contact;
+}
 
 Contact_t* addContact(
     Contact_t* contacts,
@@ -14,36 +50,21 @@ Contact_t* addContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
-    char** emails,
-    char** socials    
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]  
 )
 {
-    if (contacts == NULL || (contactsCount + 1 > MAX_CONTACTS_COUNT) ||
-        lastName == NULL || firstName == NULL)
+    if (contacts == NULL || contactsCount + 1 > MAX_CONTACTS_COUNT)
         return NULL;
     Contact_t* contact = &contacts[contactsCount];
 
-    strncpy(contact->lastName, lastName, NAME_PERSON_LENGTH - 1);
-    strncpy(contact->firstName, firstName, NAME_PERSON_LENGTH - 1);
-    if (patronim) strncpy(contact->patronim, patronim, NAME_PERSON_LENGTH - 1);
-    if (workPlace) strncpy(contact->workInfo.workPlace, workPlace, NAME_COMPANY_LENGTH) - 1;
-    if (position) strncpy(contact->workInfo.position, position, NAME_COMPANY_LENGTH - 1);
-    if (workPhone) strncpy(contact->numbers.work, workPhone, PHONE_NUMBER_LENGTH - 1);
-    if (personalPhone) strncpy(contact->numbers.personal, personalPhone, PHONE_NUMBER_LENGTH - 1);
-    if (homePhone) strncpy(contact->numbers.home, homePhone, PHONE_NUMBER_LENGTH - 1);
-    if (extraPhone) strncpy(contact->numbers.extra, extraPhone, PHONE_NUMBER_LENGTH - 1);
-    if (emails)
-    {
-        char** email = emails;
-        for (size_t i = 0; *email && i < MAX_EMAILS_COUNT; i++)
-            strncpy(contact->emails[i], *email++, MAX_EMAIL_LENGTH - 1);
-    }
-    if (socials)
-    {
-        char** social = socials;
-        for (size_t j = 0; *social && MAX_SOCIALS_COUNT; j++)
-            strncpy(contact->socialsLink[j], *social++, SOCIALS_LINK_LENGTH - 1);
-    }
+    if (!copyContactInfo(contact,
+        lastName, firstName, patronim,
+        workPlace, position,
+        workPhone, personalPhone, homePhone, extraPhone,
+        emails, socials
+    ))
+        return NULL;
 
     contactsCount++;
     return contact;
@@ -73,34 +94,20 @@ Contact_t* editContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
-    char** emails,
-    char** socials
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]
 )
 {
-    if (contact == NULL || lastName == NULL || firstName == NULL)
+    if (contact == NULL)
         return NULL;
 
-    strncpy(contact->lastName, lastName, NAME_PERSON_LENGTH - 1);
-    strncpy(contact->firstName, firstName, NAME_PERSON_LENGTH - 1);
-    if (patronim) strncpy(contact->patronim, patronim, NAME_PERSON_LENGTH - 1);
-    if (workPlace) strncpy(contact->workInfo.workPlace, workPlace, NAME_COMPANY_LENGTH) - 1;
-    if (position) strncpy(contact->workInfo.position, position, NAME_COMPANY_LENGTH - 1);
-    if (workPhone) strncpy(contact->numbers.work, workPhone, PHONE_NUMBER_LENGTH - 1);
-    if (personalPhone) strncpy(contact->numbers.personal, personalPhone, PHONE_NUMBER_LENGTH - 1);
-    if (homePhone) strncpy(contact->numbers.home, homePhone, PHONE_NUMBER_LENGTH - 1);
-    if (extraPhone) strncpy(contact->numbers.extra, extraPhone, PHONE_NUMBER_LENGTH - 1);
-    if (emails)
-    {
-        char** email = emails;
-        for (size_t i = 0; *email && i < MAX_EMAILS_COUNT; i++)
-            strncpy(contact->emails[i], *email++, MAX_EMAIL_LENGTH - 1);
-    }
-    if (socials)
-    {
-        char** social = socials;
-        for (size_t j = 0; *social && MAX_SOCIALS_COUNT; j++)
-            strncpy(contact->socialsLink[j], *social++, SOCIALS_LINK_LENGTH - 1);
-    }
+    if (!copyContactInfo(contact,
+        lastName, firstName, patronim,
+        workPlace, position,
+        workPhone, personalPhone, homePhone, extraPhone,
+        emails, socials
+    ))
+        return NULL;
 
     return contact;
 }

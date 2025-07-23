@@ -1,8 +1,13 @@
 #ifndef CONTACTS_H
 #define CONTACTS_H
 
-#define NAME_PERSON_LENGTH 50
-#define NAME_COMPANY_LENGTH 256
+#include <string.h>
+
+#define LAST_NAME_LENGTH 50
+#define FIRST_NAME_LENGTH 50
+#define PATRONIM_LENGTH 50
+#define COMPANY_NAME_LENGTH 256
+#define POSITION_LENGTH 256
 #define MAX_EMAIL_LENGTH 256
 #define PHONE_NUMBER_LENGTH 12
 #define SOCIALS_LINK_LENGTH 256
@@ -12,8 +17,8 @@
 
 typedef struct
 {
-    char workPlace[NAME_COMPANY_LENGTH];
-    char position[NAME_COMPANY_LENGTH];
+    char workPlace[COMPANY_NAME_LENGTH];
+    char position[POSITION_LENGTH];
 } Work_t;
 
 typedef struct
@@ -26,9 +31,9 @@ typedef struct
 
 typedef struct
 {
-    char lastName[NAME_PERSON_LENGTH];
-    char firstName[NAME_PERSON_LENGTH];
-    char patronim[NAME_PERSON_LENGTH];
+    char lastName[LAST_NAME_LENGTH];
+    char firstName[FIRST_NAME_LENGTH];
+    char patronim[PATRONIM_LENGTH];
     PhoneNumbers_t numbers;
     Work_t workInfo;
     char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH];
@@ -48,8 +53,8 @@ Contact_t* addContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
-    char** emails,
-    char** socials    
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH] 
 );
 
 int deleteContact(
@@ -68,8 +73,23 @@ Contact_t* editContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
-    char** emails,
-    char** socials
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]
+);
+
+Contact_t* copyContactInfo(
+    Contact_t* contact,
+    const char* lastName,
+    const char* firstName,
+    const char* patronim,
+    const char* workPlace,
+    const char* position,
+    const char* workPhone,
+    const char* personalPhone,
+    const char* homePhone,
+    const char* extraPhone,
+    char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH],
+    char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]  
 );
 
 #endif
