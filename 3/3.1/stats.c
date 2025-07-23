@@ -81,3 +81,127 @@ void printMode(const __mode_t mode)
         printf(mode & S_IXOTH ? "x" : "-");
     puts("");
 }
+
+int parseOption(char* option, __mode_t* mode)
+{
+    char *c = option;
+    __mode_t ugoMask = 0;
+    __mode_t modeMask = 0;
+    int opCode = 0;
+    int flagUGO = 0, flagOP = 0, flagPERM = 0;
+    if (!mode)
+    {
+        puts("Can't get initial permission mode!\n");
+        return 0;
+    }
+    while (*c)
+    {
+        switch (*c)
+        {
+        case 'u':
+            ugoMask |= S_ISUID | S_IRWXU;  // 04700;
+            flagUGO = 1;
+            break;
+        case 'g':
+            ugoMask |= S_ISGID | S_IRWXG;  // 02070;
+            flagUGO = 1;
+            break;
+        case 'o':
+            ugoMask |= __S_ISVTX | S_IRWXO;  // 01007;
+            flagUGO = 1;
+            break;
+        case 'a':
+            ugoMask |= S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID | __S_ISVTX;  // 07777;
+            flagUGO = 1;
+            break;
+        case 'r':
+            modeMask |= S_IRUSR | S_IRGRP | S_IROTH;  // 00444;
+            flagPERM = 1;
+            break;
+        case 'w':
+            modeMask |= S_IWUSR | S_IWGRP | S_IWOTH; // 00222;
+            flagPERM = 1;
+            break;
+        case 'x':
+            modeMask |= S_IXUSR | S_IXGRP | S_IXOTH;  // 00111;
+            flagPERM = 1;
+            break;
+        case 's':
+            modeMask |= S_ISUID | S_ISGID;  // 06000;
+            flagPERM = 1;
+            break;
+        case 't':
+            modeMask |= __S_ISVTX;  // 01000;
+            flagPERM = 1;
+            break;
+        case '+':
+        case '-':
+        case '=':
+            if (flagOP)
+            {
+                printf("More than one operation in %s!\n", option);
+                return 0;
+            }
+            if (flagUGO && !flagPERM)
+            {
+                flagOP = 1;
+                if (*c == '+')
+                    opCode = 1;
+                else if (*c == '-')
+                    opCode = 2;
+                else
+                    opCode = 3;
+                break;
+            }
+            else
+            {
+                printf("Incorrect format of option %s! %d%d%d\n", option, flagUGO, flagOP, flagPERM);
+                return 0;
+            }
+        default:
+            printf("Incorrect symbol %c in option %s!\n", *c, option);
+            return 0;
+        }
+        *c++;
+    }
+    __mode_t mask = ugoMask & modeMask;
+    if (opCode == 1)
+    {
+        *mode = *mode | mask;
+        return opCode;
+    }
+    if (opCode == 2)
+    {
+        *mode = *mode & ~mask;
+        return opCode;
+    }
+    if (opCode == 3)
+    {
+        *mode = mask | (*mode & ~ugoMask);
+        return opCode;
+    }
+    return 0;
+}
+
+int parseChmod(const int argc, char* argv[])
+{
+    __mode_t mode;
+    if (argc == 4 && sscanf(argv[3], "%o", &mode))
+    {
+        puts("New mode: ");
+        printMode(mode);
+        return 1;
+    }
+    else
+    {
+        mode = getMode(argv[argc - 1]);
+        for (size_t i = 2; i < argc - 1; i++)
+        {
+            if (!parseOption(argv[i], &mode))
+                return 0;
+        }
+        puts("New mode: ");
+        printMode(mode);
+    }
+    return 1;
+}
