@@ -1,13 +1,28 @@
-all: 2-1-exec
+CC = gcc
+CFLAGS = -Wall -Wextra -Iunity -Isrc
 
-2-1-exec: main.o contacts.o
-	gcc main.o contacts.o -o 2-1-exec
+SRC_DIR = src
+TEST_DIR = tests
+UNITY_DIR = unity
 
-main.o: main.c
-	gcc -c main.c
+SRC_FILES = $(SRC_DIR)/*.c
+TEST_FILES = $(TEST_DIR)/test_*.c $(UNITY_DIR)/unity.c
 
-contacts.o: contacts.c
-	gcc -c contacts.c
+TARGET = bin/app
+TEST_TARGET = bin/test_runner
 
+$(shell mkdir -p bin)
+
+all: $(TARGET)
+
+$(TARGET): $(SRC_FILES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_FILES)
+
+.PHONY: test
+test: $(SRC_FILES) $(TEST_FILES)
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(SRC_FILES) $(TEST_FILES)
+	./$(TEST_TARGET)
+
+.PHONY: clean
 clean:
-	rm -rf *.o 2-1-exec
+	rm -rf bin/*.o bin/2-1-exec
