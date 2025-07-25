@@ -174,7 +174,7 @@ int editContactInfo(Contact_t *contact)
         }
         printf("%ld. Выход из режима редактирования.\n Ваш выбор: ", menuCount + 1);
 
-        if (!scanf("%d", &choice) || choice < 1 || choice > menuCount + 1)
+        if (!scanf("%d", &choice) || choice < 1 || (size_t)choice > menuCount + 1)
         {
             printf("Некорректный выбор! Попробуйте еще раз.\n");
             CLEAR_BUFFER();
@@ -282,9 +282,9 @@ Contact_t* chooseContact(Contact_t* contacts)
     if (!contactsCount)
         return NULL;
     printf("Выберите индекс контакта: ");
-    int choice;
+    size_t choice;
 
-    while (!scanf("%d", &choice) || choice < 1 || choice > contactsCount)
+    while (!scanf("%ld", &choice) || choice < 1 || choice > contactsCount)
     {
         printf("Некорректный выбор! Попробуйте еще раз.\n");
         CLEAR_BUFFER();

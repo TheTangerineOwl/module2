@@ -20,7 +20,7 @@ Contact_t* copyContactInfo(
     strncpy(contact->lastName, lastName, LAST_NAME_LENGTH - 1);
     strncpy(contact->firstName, firstName, FIRST_NAME_LENGTH - 1);
     if (patronim) strncpy(contact->patronim, patronim, PATRONIM_LENGTH - 1);
-    if (workPlace) strncpy(contact->workInfo.workPlace, workPlace, COMPANY_NAME_LENGTH) - 1;
+    if (workPlace) strncpy(contact->workInfo.workPlace, workPlace, COMPANY_NAME_LENGTH - 1);
     if (position) strncpy(contact->workInfo.position, position, POSITION_LENGTH - 1);
     if (workPhone) strncpy(contact->numbers.work, workPhone, PHONE_NUMBER_LENGTH - 1);
     if (personalPhone) strncpy(contact->numbers.personal, personalPhone, PHONE_NUMBER_LENGTH - 1);
@@ -72,7 +72,7 @@ Contact_t* addContact(
 
 int deleteContact(
     Contact_t* contacts,
-    int index
+    size_t index
 )
 {
     if (index >= MAX_CONTACTS_COUNT || index >= contactsCount)

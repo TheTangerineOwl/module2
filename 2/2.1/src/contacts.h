@@ -41,7 +41,7 @@ typedef struct
     char socialsLink[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH];
 } Contact_t;
 
-extern int contactsCount;
+extern size_t contactsCount;
 
 Contact_t* addContact(
     Contact_t* contacts,
@@ -60,7 +60,7 @@ Contact_t* addContact(
 
 int deleteContact(
     Contact_t* contacts,
-    int index
+    size_t index
 );
 
 Contact_t* editContact(

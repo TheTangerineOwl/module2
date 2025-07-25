@@ -1,12 +1,13 @@
 #include "contacts.h"
 
-int contactsCount = 0;
+size_t contactsCount = 0;
 
 int main()
 {
     Contact_t contacts[MAX_CONTACTS_COUNT];
     
-    int choice, exitFlag = 0;
+    size_t choice;
+    int exitFlag = 0;
     Contact_t* currentContact;
 
     char c;
@@ -21,7 +22,7 @@ int main()
         puts("5. Вывести все контакты;");
         printf("6. Выход. Ваш выбор: ");
 
-        while (!scanf("%d", &choice) || choice < 1 || choice > 6)
+        while (!scanf("%ld", &choice) || choice < 1 || choice > 6)
         {
             puts("Некорректный выбор! Попробуйте еще раз.\n");
             while ((c = getchar() != '\n') && c != EOF);
@@ -54,8 +55,8 @@ int main()
             puts("Все контакты:");
             printShortContacts(contacts);
             printf("Выберите индекс контакта для удаления: ");
-            int choice;
-            while (!scanf("%d", &choice) || choice < 1 || choice > contactsCount)
+            size_t choice;
+            while (!scanf("%ld", &choice) || choice < 1 || choice > contactsCount)
             {
                 printf("Некорректный выбор! Попробуйте еще раз.\n");
                 while ((c = getchar() != '\n') && c != EOF);
