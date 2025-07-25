@@ -1,5 +1,25 @@
 #include "contacts.h"
 
+Contact_t* clearContact(Contact_t* contact)
+{
+    if (!contact)
+        return NULL;
+    strncpy(contact->lastName, "", LAST_NAME_LENGTH - 1);
+    strncpy(contact->firstName, "", FIRST_NAME_LENGTH - 1);
+    strncpy(contact->patronim, "", PATRONIM_LENGTH - 1);
+    strncpy(contact->workInfo.workPlace, "", COMPANY_NAME_LENGTH - 1);
+    strncpy(contact->workInfo.position, "", POSITION_LENGTH - 1);
+    strncpy(contact->numbers.work, "", PHONE_NUMBER_LENGTH - 1);
+    strncpy(contact->numbers.personal, "", PHONE_NUMBER_LENGTH - 1);
+    strncpy(contact->numbers.home, "", PHONE_NUMBER_LENGTH - 1);
+    strncpy(contact->numbers.extra, "", PHONE_NUMBER_LENGTH - 1);
+    for (size_t i = 0; i < MAX_EMAILS_COUNT; i++)
+        strncpy(contact->emails[i], "", MAX_EMAIL_LENGTH - 1);
+    for (size_t j = 0; j < MAX_SOCIALS_COUNT; j++)
+        strncpy(contact->socialsLink[j], "", SOCIALS_LINK_LENGTH - 1);
+    return contact;
+}
+
 Contact_t* copyContactInfo(
     Contact_t* contact,
     const char* lastName,
@@ -15,7 +35,8 @@ Contact_t* copyContactInfo(
     char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH]   
 )
 {
-    if (lastName == NULL || firstName == NULL)
+    if (lastName == NULL || strlen(lastName) < 1
+        || firstName == NULL || strlen(firstName) < 1)
         return NULL;
     strncpy(contact->lastName, lastName, LAST_NAME_LENGTH - 1);
     strncpy(contact->firstName, firstName, FIRST_NAME_LENGTH - 1);
@@ -75,10 +96,12 @@ int deleteContact(
     size_t index
 )
 {
-    if (index >= MAX_CONTACTS_COUNT || index >= contactsCount)
+    if (!contacts || index >= MAX_CONTACTS_COUNT || index >= contactsCount)
         return 0;
     for (size_t i = index; i < (size_t)contactsCount; i++)
         contacts[i] = contacts[i + 1];
+    if (contactsCount == MAX_CONTACTS_COUNT)
+        clearContact(&contacts[MAX_CONTACTS_COUNT - 1]);
     contactsCount--;
     return 1;
 }
