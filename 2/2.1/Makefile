@@ -17,11 +17,11 @@ $(shell mkdir -p bin)
 all: $(TARGET)
 
 $(TARGET): $(SRC_FILES) $(MAIN_FILE)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_FILES)
+	$(CC) $(CFLAGS) -o $(TARGET) $^
 
 .PHONY: test
 test: $(SRC_FILES) $(TEST_FILES)
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(SRC_FILES) $(TEST_FILES)
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) $^
 	./$(TEST_TARGET)
 
 .PHONY: clean
