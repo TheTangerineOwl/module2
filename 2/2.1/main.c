@@ -5,44 +5,7 @@ int contactsCount = 0;
 int main()
 {
     Contact_t contacts[MAX_CONTACTS_COUNT];
-    // enterContactInfo(contacts);
-    // char poof[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH] = {""};
-    // char spoof[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH] = {""};
-    // addContact(
-    //     contacts,
-    //     "lastName", "firstName", "patronim",
-    //     "workPlace", "position",
-    //     "83334445555", "89994449999",
-    //     "123456", "87776665555",
-    //     poof, spoof
-    // );
-    // char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH] = { "wavydavy@foodgram.ru", "isonfire@mail.ru" };
-    // char socials[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH] = { "tg.com/l0", "vk.ru/id0", "contact.ru/contact" };
-    // Contact_t* res = addContact(contacts,
-    //     "Wavy", "Davy",
-    //     "Isonfire", "APAC", "soldier",
-    //     "88005555335",
-    //     "88889993333",
-    //     "123445", "89993334444",
-    //     emails,
-    //     socials
-    // );
-    // printf("Все контакты: \n");
-    // printAllContacts(contacts);
-    // printf("Редактирование: \n");
-    // // editContact(
-    // //     &contacts[1],
-    // //     "Wavvyyyy", "Davyyy",
-    // //     "Isonfireee", "",
-    // //     "", "",
-    // //     "", "", "",
-    // //     poof, spoof
-    // // );
-    // printAllContacts(contacts);
-    // deleteContact(contacts, 0);
-    // printf("После удаления: \n");
-    // printAllContacts(contacts);
-
+    
     int choice, exitFlag = 0;
     Contact_t* currentContact;
 

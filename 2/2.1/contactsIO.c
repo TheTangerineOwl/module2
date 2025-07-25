@@ -8,7 +8,6 @@ char c;
 
 char* enterStrField(char* field, size_t fieldLength)
 {
-    //CLEAR_BUFFER();
     if (!fgets(field, fieldLength, stdin))
     {
         puts("Не удалось прочитать строку из потока ввода!");
@@ -89,7 +88,6 @@ int enterContactInfo(Contact_t* contacts)
     char emails[MAX_EMAILS_COUNT][MAX_EMAIL_LENGTH];
     char socialsLink[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH];
 
-    //CLEAR_BUFFER();
     printf("Введите фамилию: ");
     enterStrField(lastName, LAST_NAME_LENGTH);
     while (strlen(lastName) == 0)
@@ -151,6 +149,7 @@ char* changeField(char* oldField, const ContactField field)
     printf("Введите новое значение: ");
     if (!enterStrField(oldField, field.fieldLength))
         return NULL;
+    return oldField;
 }
 
 int editContactInfo(Contact_t *contact)
@@ -175,8 +174,6 @@ int editContactInfo(Contact_t *contact)
         }
         printf("%ld. Выход из режима редактирования.\n Ваш выбор: ", menuCount + 1);
 
-        //CLEAR_BUFFER();
-
         if (!scanf("%d", &choice) || choice < 1 || choice > menuCount + 1)
         {
             printf("Некорректный выбор! Попробуйте еще раз.\n");
@@ -190,47 +187,57 @@ int editContactInfo(Contact_t *contact)
         switch (choice)
         {
         case LAST_NAME:
-            changeField(newValues.lastName, menuItems[choice]);
+            changeField(newValues.lastName, menuItems[LAST_NAME]);
             break;
         case FIRST_NAME:
-            changeField(newValues.firstName, menuItems[choice]);
+            changeField(newValues.firstName, menuItems[FIRST_NAME]);
             break;
         case PATRONIM:
-            changeField(newValues.patronim, menuItems[choice]);
+            changeField(newValues.patronim, menuItems[PATRONIM]);
             break;
         case WORK_PLACE:
-            changeField(newValues.workInfo.workPlace, menuItems[choice]);
+            changeField(newValues.workInfo.workPlace, menuItems[WORK_PLACE]);
             break;
         case POSITION:
-            changeField(newValues.workInfo.position, menuItems[choice]);
+            changeField(newValues.workInfo.position, menuItems[POSITION]);
             break;
         case WORK_PHONE:
-            changeField(newValues.numbers.work, menuItems[choice]);
+            changeField(newValues.numbers.work, menuItems[WORK_PHONE]);
             break;
         case PERSONAL_PHONE:
-            changeField(newValues.numbers.personal, menuItems[choice]);
+            changeField(newValues.numbers.personal, menuItems[PERSONAL_PHONE]);
             break;
         case HOME_PHONE:
-            changeField(newValues.numbers.home, menuItems[choice]);
+            changeField(newValues.numbers.home, menuItems[HOME_PHONE]);
             break;
         case EXTRA_PHONE:
-            changeField(newValues.numbers.extra, menuItems[choice]);
+            changeField(newValues.numbers.extra, menuItems[EXTRA_PHONE]);
             break;
         case EMAIL:
         {
+            char oldValue[MAX_EMAIL_LENGTH];
             for (size_t i = 0; i < MAX_EMAILS_COUNT; i++)
             {
+                strcpy(oldValue, newValues.emails[i]);
                 if (i > 1 && strlen(newValues.emails[i - 1]) < 1)
-                    changeField(newValues.emails[i], menuItems[choice]);
+                    break;
+                changeField(newValues.emails[i], menuItems[EMAIL]);
+                if (strlen(newValues.emails[i]) < 1)
+                    strcpy(newValues.emails[i], oldValue);
             }
         }
         break;
         case SOCIAL_LINK:
         {
+            char oldValue[MAX_EMAIL_LENGTH];
             for (size_t i = 0; i < MAX_EMAILS_COUNT; i++)
             {
+                strcpy(oldValue, newValues.socialsLink[i]);
                 if (i > 1 && strlen(newValues.socialsLink[i - 1]) < 1)
-                    changeField(newValues.socialsLink[i], menuItems[choice]);
+                    break;
+                changeField(newValues.socialsLink[i], menuItems[SOCIAL_LINK]);
+                if (strlen(newValues.socialsLink[i]) < 1)
+                    strcpy(newValues.socialsLink[i], oldValue);
             }
         }
         break;
@@ -241,7 +248,7 @@ int editContactInfo(Contact_t *contact)
             puts("После изменения:");
             printContact(newValues);
             printf("Закончить редактирование (0 - нет, 1 - да, 2 - отменить изменения)? Выбор: ");
-            //CLEAR_BUFFER();
+
             while (!scanf("%d", &choice) || choice < 0 || choice > 2)
             {
                 printf("Некорректный выбор! Попробуйте еще раз.\n");
@@ -276,7 +283,7 @@ Contact_t* chooseContact(Contact_t* contacts)
         return NULL;
     printf("Выберите индекс контакта: ");
     int choice;
-    //CLEAR_BUFFER();
+
     while (!scanf("%d", &choice) || choice < 1 || choice > contactsCount)
     {
         printf("Некорректный выбор! Попробуйте еще раз.\n");
