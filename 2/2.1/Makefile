@@ -5,7 +5,8 @@ SRC_DIR = src
 TEST_DIR = tests
 UNITY_DIR = unity
 
-SRC_FILES = $(SRC_DIR)/*.c
+SRC_FILES = $(filter-out $(SRC_DIR)/main.c, $(wildcard $(SRC_DIR)/*.c))
+MAIN_FILE = $(SRC_DIR)/main.c
 TEST_FILES = $(TEST_DIR)/test_*.c $(UNITY_DIR)/unity.c
 
 TARGET = bin/app
@@ -15,7 +16,7 @@ $(shell mkdir -p bin)
 
 all: $(TARGET)
 
-$(TARGET): $(SRC_FILES)
+$(TARGET): $(SRC_FILES) $(MAIN_FILE)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC_FILES)
 
 .PHONY: test
@@ -25,4 +26,4 @@ test: $(SRC_FILES) $(TEST_FILES)
 
 .PHONY: clean
 clean:
-	rm -rf bin/*.o bin/2-1-exec
+	rm -rf $(TARGET) $(TEST_TARGET)

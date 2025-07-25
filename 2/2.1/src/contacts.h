@@ -41,8 +41,10 @@ typedef struct
     char socialsLink[MAX_SOCIALS_COUNT][SOCIALS_LINK_LENGTH];
 } Contact_t;
 
+extern Contact_t contacts[MAX_CONTACTS_COUNT];
 extern size_t contactsCount;
 
+Contact_t* clearContact(Contact_t* contact);
 Contact_t* addContact(
     Contact_t* contacts,
     const char* lastName,
