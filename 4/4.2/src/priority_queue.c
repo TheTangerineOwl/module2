@@ -4,7 +4,10 @@ extern PrQueue_t queue;
 
 PrQueue_t* prQueueInit(PrQueue_t* queue)
 {
-    queue = (PrQueue_t*)malloc(sizeof(PrQueue_t));
+    if (!queue)
+        queue = (PrQueue_t*)malloc(sizeof(PrQueue_t));
+    if (!queue)
+        return NULL;
     queue->head = queue->tail = NULL;
     queue->length = 0;
     return queue;
@@ -13,7 +16,7 @@ PrQueue_t* prQueueInit(PrQueue_t* queue)
 Node_t* prQueueEnqueue(PrQueue_t* queue, unsigned char priority, int value)
 {
     Node_t* node = (Node_t*)malloc(sizeof(Node_t));
-    if (!node)
+    if (!node || !queue)
         return NULL;
     node->priority = priority;
     node->value = value;
@@ -62,14 +65,14 @@ static Node_t* prQueueDequeueNode(PrQueue_t* queue, Node_t* prev, Node_t* curren
 
 Node_t* prQueueDequeue(PrQueue_t* queue)
 {
-    if (!queue->head)
+    if (!queue || !queue->head)
         return NULL;
     return prQueueDequeueNode(queue, NULL, queue->head);
 }
 
 Node_t* prQueueDeqExactPriority(PrQueue_t* queue, int priority)
 {
-    if (!queue->head)
+    if (!queue || !queue->head)
         return NULL;
     Node_t* prev = NULL, *current = queue->head;
 
@@ -84,7 +87,7 @@ Node_t* prQueueDeqExactPriority(PrQueue_t* queue, int priority)
 
 Node_t* prQueueDeqHighPriority(PrQueue_t* queue, int minPriority)
 {
-    if (!queue->head)
+    if (!queue || !queue->head)
         return NULL;
 
     Node_t* prev = NULL, *current = queue->head;
