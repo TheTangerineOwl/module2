@@ -1,12 +1,17 @@
 #include "priority_queue.h"
-
 #include <stdio.h>
+
+#include <stdlib.h>
+#include <time.h>
 
 PrQueue_t queue;
 
 void prQueuePrintNode(const Node_t* node)
 {
-    printf("[%u, %d]", node->priority, node->value);
+    if (node)
+        printf("[%u, %d]", node->priority, node->value);
+    else
+        printf("[-, -]");
 }
 
 void prQueuePrint(const PrQueue_t queue)
@@ -15,44 +20,89 @@ void prQueuePrint(const PrQueue_t queue)
     while (item)
     {
         prQueuePrintNode(item);
-        printf(", ");
+        if (item->next)
+            printf(", ");
         item = item->next;
     }
 }
-
-#define PRHT(q) \
-        printf("\nHead is ");\
-        prQueuePrintNode(q.head);\
-        printf(" and tail is ");\
-        prQueuePrintNode(q.tail);\
-        puts("")
 
 int main(void)
 {
     if (!prQueueInit(&queue))
         return 1;
-    for (int i = 0; i < 15; i++)
+    srand(time(NULL));
+    for (int i = 0; i < 10; i++)
     {
-        printf("\nAdding  [%d, %d], q's len: %ld\n", i % 10, i + 1, queue.length);
-        prQueueEnqueue(&queue, i % 10, i + 1);
-        prQueuePrint(queue);
+        int num = rand() % 10;
+        if (!prQueueEnqueue(&queue, num, i + 1))
+            printf("Ничего не было добавлено! Длина очереди: %ld\n", queue.length);
+        else
+            printf("Добавлен  [%d, %d], длина очереди: %ld\n", num, i + 1, queue.length);
     }
-    prQueueDequeue(&queue);
-    PRHT(queue);
-    printf("\nQueue len: %ld, deq head\n", queue.length);
+    printf("Длина очереди: %ld, очередь: ", queue.length);
     prQueuePrint(queue);
 
-    prQueueDeqExactPriority(&queue, 9);
-    printf("\nQueue len: %ld, deq 9\n", queue.length);
-    prQueuePrint(queue);
-    PRHT(queue);
+    Node_t* pop;
 
-    prQueueDeqHighPriority(&queue, 3);
-    printf("\nQueue len: %ld, ded >= 3\n", queue.length);
+    pop = prQueueDequeue(&queue);
+    if (!pop)
+        printf("\nНе удалось удалить элемент из головы!");
+    else
+    {
+        printf("\nУдаленный элемент (голова): ");
+        prQueuePrintNode(pop);
+    }
+    free(pop);
+    printf("\nДлина очереди: %ld, очередь: ", queue.length);
     prQueuePrint(queue);
-    PRHT(queue);
+
+    pop = prQueueDeqExactPriority(&queue, 3);
+    if (!pop)
+        printf("\nНе удалось удалить элемент с приоритетом 3!");
+    else
+    {
+        printf("\nУдаленный элемент (с приоритетом 3): ");
+        prQueuePrintNode(pop);
+    }
+    free(pop);
+    printf("\nДлина очереди: %ld, очередь: ", queue.length);
+    prQueuePrint(queue);
+
+    pop = prQueueDeqHighPriority(&queue, 5);
+    if (!pop)
+        printf("\nНе удалось удалить элемент с приоритетом больше 5!");
+    else
+    {
+        printf("\nУдаленный элемент (приоритет >= 5): ");
+        prQueuePrintNode(pop);
+    }
+    free(pop);
+    printf("\nДлина очереди: %ld, очередь: ", queue.length);
+    prQueuePrint(queue);
+
+    pop = prQueueEnqueue(&queue, 0, 11);
+    if (!pop)
+        printf("\nНе удалось добавить элемент [0, 11]!");
+    else
+    {
+        printf("\nДобавленный элемент: ");
+        prQueuePrintNode(pop);
+    }
+    printf("\nДлина очереди: %ld, очередь: ", queue.length);
+    prQueuePrint(queue);
+
+    pop = prQueueEnqueue(&queue, 255, 12);
+    if (!pop)
+        printf("\nНе удалось добавить элемент [255, 12]!");
+    else
+    {
+        printf("\nДобавленный элемент: ");
+        prQueuePrintNode(pop);
+    }
+    printf("\nДлина очереди: %ld, очередь: ", queue.length);
+    prQueuePrint(queue);
 
     prQueueClear(&queue);
-    printf("\nQueue len: %ld\n", queue.length);
+    printf("\nДлина очереди после очистки: %ld\n", queue.length);
     return 0;
 }

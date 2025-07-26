@@ -5,8 +5,7 @@ extern PrQueue_t queue;
 PrQueue_t* prQueueInit(PrQueue_t* queue)
 {
     queue = (PrQueue_t*)malloc(sizeof(PrQueue_t));
-    queue->head = NULL;
-    queue->tail = NULL;
+    queue->head = queue->tail = NULL;
     queue->length = 0;
     return queue;
 }
@@ -14,105 +13,97 @@ PrQueue_t* prQueueInit(PrQueue_t* queue)
 Node_t* prQueueEnqueue(PrQueue_t* queue, unsigned char priority, int value)
 {
     Node_t* node = (Node_t*)malloc(sizeof(Node_t));
+    if (!node)
+        return NULL;
     node->priority = priority;
     node->value = value;
     node->next = NULL;
     Node_t* current;
     if (!queue->head)
     {
+        queue->head = queue->tail = node;
+        queue->length = 1;
+        return node;
+    }
+    
+    if (priority < queue->head->priority) {
+        node->next = queue->head;
         queue->head = node;
-        queue->tail = node;
         queue->length++;
         return node;
     }
-    else
-        current = queue->head;
+
+    current = queue->head;
     while (current->next && current->next->priority <= priority)
         current = current->next;
-    if (!current->next)
-    {
-        current->next = node;
-        queue->tail->next = node;
+
+    node->next = current->next;
+    current->next = node;
+    if (!node->next)
         queue->tail = node;
-    }
-    else
-    {
-        Node_t* tailing = current->next;
-        node->next = tailing;
-        current->next = node;
-    }
     queue->length++;
     return node;
 }
 
+static Node_t* prQueueDequeueNode(PrQueue_t* queue, Node_t* prev, Node_t* current)
+{
+    if (!queue || !current)
+        return NULL;
+    if (prev)
+        prev->next = current->next;
+    else
+        queue->head = current->next;
+    if (!current->next)
+        queue->tail = prev ? prev : queue->head;
+    queue->length--;
+    current->next = NULL;
+    return current;
+}
+
 Node_t* prQueueDequeue(PrQueue_t* queue)
 {
-    Node_t* head = queue->head;
-    queue->head = head->next;
-    if (!head->next)
-        queue->tail = queue->head;
-    queue->length--;
-    return head;
+    if (!queue->head)
+        return NULL;
+    return prQueueDequeueNode(queue, NULL, queue->head);
 }
 
 Node_t* prQueueDeqExactPriority(PrQueue_t* queue, int priority)
 {
     if (!queue->head)
-        return queue->head;
-    Node_t* item = queue->head, *buffer;
-    if (item->priority == priority)
-    {
-        buffer = item;
-        item = item->next;
-        queue->head = item;
-        if (!item->next)
-            queue->tail = item;
-        queue->length--;
-        return buffer;
-    }
-    while (item->next && item->next->priority != priority)
-        item = item->next;
-    if (!item->next)
         return NULL;
-    buffer = item->next;
-    item->next = item->next->next;
-    if (!item->next)
-        queue->tail = item;
-    queue->length--;
-    return buffer;
+    Node_t* prev = NULL, *current = queue->head;
+
+    while (current && current->priority != priority)
+    {
+        prev = current;
+        current = current->next;
+    }
+
+    return current ? prQueueDequeueNode(queue, prev, current) : NULL;
 }
 
 Node_t* prQueueDeqHighPriority(PrQueue_t* queue, int minPriority)
 {
     if (!queue->head)
-        return queue->head;
-    Node_t* item = queue->head, *buffer;
-    if (item->priority >= minPriority)
-    {
-        buffer = item;
-        item = item->next;
-        queue->head = item;
-        if (!item->next)
-            queue->tail = item;
-        queue->length--;
-        return buffer;
-    }
-    while (item->next && item->next->priority < minPriority)
-        item = item->next;
-    if (!item->next)
         return NULL;
-    buffer = item->next;
-    item->next = item->next->next;
-    if (!item->next)
-        queue->tail = item;
-    queue->length--;
-    return buffer;
+
+    Node_t* prev = NULL, *current = queue->head;
+
+    while (current && current->priority < minPriority)
+    {
+        prev = current;
+        current = current->next;
+    }
+
+    return current ? prQueueDequeueNode(queue, prev, current) : NULL;
 }
 
 PrQueue_t* prQueueClear(PrQueue_t* queue)
 {
-    Node_t* item = queue->head;
-    while (item->next)
-        item = prQueueDequeue(queue);
+    if (!queue)
+        return NULL;
+    Node_t* item;
+    while ((item = prQueueDequeue(queue)) != NULL)
+        free(item);
     return queue;
 }
