@@ -14,7 +14,6 @@ __mode_t getMode(const char* filename)
 }
 
 void printBinary(const __mode_t mode) {
-    //int bits = sizeof(__mode_t) * 8; 
 
     for (int i = 11; i >= 0; i--) {
         printf("%d", (mode >> i) & 1); 
