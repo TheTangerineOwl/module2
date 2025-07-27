@@ -102,16 +102,32 @@ Contact_t* editContact(
     if (emails)
     {
         if (contact->emails)
-            while (contactDeleteEmail(contact, 0));
-        for (size_t i = 0; emails[i] && i < MAX_EMAILS_COUNT; i++)
-            contactAddEmail(contact, emails[i]);
+        {
+            size_t j = 0;
+            for (; j < contact->emailCount; j++)
+                if (emails[j])
+                    contactEditEmail(contact, j, emails[j]);
+            for (; emails[j] && j < MAX_EMAILS_COUNT; j++)
+                contactAddEmail(contact, emails[j]);
+        }
+        else
+            for (size_t i = 0; emails[i] && i < MAX_EMAILS_COUNT; i++)
+                contactAddEmail(contact, emails[i]);
     }
     if (socials)
     {
         if (contact->socialsLink)
-            while (contactDeleteSocial(contact, 0));
-        for (size_t i = 0; socials[i] && i < MAX_SOCIALS_COUNT; i++)
-            contactAddSocials(contact, socials[i]);
+        {
+            size_t j = 0;
+            for (; j < contact->socialsCount; j++)
+                if (socials[j])
+                    contactEditSocial(contact, j, socials[j]);
+            for (; socials[j] && j < MAX_SOCIALS_COUNT; j++)
+                contactAddSocial(contact, socials[j]);
+        }
+        else
+            for (size_t i = 0; socials[i] && i < MAX_EMAILS_COUNT; i++)
+                contactAddSocial(contact, emails[i]);
     }
 
     return contact;
@@ -143,7 +159,7 @@ Contact_t* contactAddEmail(Contact_t* contact, const char* email)
     return contact;
 }
 
-Contact_t* contactAddSocials(Contact_t* contact, const char* socialLink)
+Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink)
 {
     if (!contact || !socialLink || contact->socialsCount >= MAX_SOCIALS_COUNT)
         return contact;
@@ -165,6 +181,42 @@ Contact_t* contactAddSocials(Contact_t* contact, const char* socialLink)
     strncpy(contact->socialsLink[contact->socialsCount], socialLink, length);
     contact->socialsLink[contact->socialsCount][length] = '\0';
     contact->socialsCount++;
+
+    return contact;
+}
+
+Contact_t* contactEditEmail(Contact_t* contact, const size_t index, const char* newValue)
+{
+    if (!contact || !contact->emails || index >= contact->emailCount)
+        return NULL;
+    size_t size = strlen(newValue);
+    if (size >= MAX_EMAIL_LENGTH)
+        size = MAX_EMAIL_LENGTH - 1;
+    char * newEmail = (char*)realloc(contact->emails[index], (size + 1) * sizeof(char));
+    if (!newEmail)
+        return NULL;
+    contact->emails[index] = newEmail;
+
+    strncpy(contact->emails[index], newValue, size);
+    contact->emails[index][size] = '\0';
+
+    return contact;
+}
+
+Contact_t* contactEditSocial(Contact_t* contact, const size_t index, const char* newValue)
+{
+    if (!contact || !contact->socialsLink || index >= contact->socialsCount)
+        return NULL;
+    size_t size = strlen(newValue);
+    if (size >= SOCIALS_LINK_LENGTH)
+        size = SOCIALS_LINK_LENGTH - 1;
+    char * newSocial = (char*)realloc(contact->socialsLink[index], (size + 1) * sizeof(char));
+    if (!newSocial)
+        return NULL;
+    contact->socialsLink[index] = newSocial;
+
+    strncpy(contact->socialsLink[index], newValue, size);
+    contact->socialsLink[index][size] = '\0';
 
     return contact;
 }
@@ -281,7 +333,7 @@ Contact_t* copyToContact(
     if (socials)
         for (size_t i = 0; socials[i] && i < MAX_SOCIALS_COUNT; i++)
         {
-            if (!contactAddSocials(contact, socials[i]))
+            if (!contactAddSocial(contact, socials[i]))
                 printf("Не удалось добавить ссылку на соцсеть %lu (%s)!", i, socials[i]);
         }
 

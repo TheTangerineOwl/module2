@@ -90,8 +90,10 @@ Contact_t* copyToContact(
     char** socials
 );
 Contact_t* contactAddEmail(Contact_t* contact, const char* email);
-Contact_t* contactAddSocials(Contact_t* contact, const char* socialLink);
+Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink);
 Contact_t* contactDeleteEmail(Contact_t* contact, const size_t index);
 Contact_t* contactDeleteSocial(Contact_t* contact, const size_t index);
+Contact_t* contactEditEmail(Contact_t* contact, const size_t index, const char* newValue);
+Contact_t* contactEditSocial(Contact_t* contact, const size_t index, const char* newValue);
 
 #endif

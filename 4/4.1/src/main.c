@@ -26,13 +26,6 @@ int main(void)
     char* emails2[] = {"test2@example.com", "work2@company.org", NULL};
     char* socials2[] = {"vk.com/test2", "auberge.com", NULL};
 
-    
-    // На данный момент функция editContact, если ей
-    // передать emails или socials, сначала стирает
-    // предыдущие почты/соцсети, а после добавляет новые,
-    // что, собственно, оставляет сохранение предыдущих
-    // значений на плечах пользователя и не есть хорошо.
-
     if (!editContact(
         contact,
         NULL, "ФерстНейм", "Садововна",
