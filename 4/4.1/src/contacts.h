@@ -45,6 +45,8 @@ typedef struct Contact_t
 
 extern size_t contactsCount;
 
+int compareContacts(const Contact_t contact1, const Contact_t contact2);
+
 Contact_t* clearContact(Contact_t* contact);
 Contact_t* newContact(
     const char* lastName,
@@ -89,6 +91,7 @@ Contact_t* copyToContact(
     char** emails,
     char** socials
 );
+
 Contact_t* contactAddEmail(Contact_t* contact, const char* email);
 Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink);
 Contact_t* contactDeleteEmail(Contact_t* contact, const size_t index);

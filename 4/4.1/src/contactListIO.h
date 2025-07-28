@@ -4,6 +4,9 @@
 #include "contacts.h"
 #include "contactList.h"
 
+extern List_t contactList;
+extern size_t contactsCount;
+
 typedef struct
 {
     const char* name;

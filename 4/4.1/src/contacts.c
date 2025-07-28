@@ -1,5 +1,18 @@
 #include "contacts.h"
 
+extern size_t contactsCount;
+
+int compareContacts(const Contact_t contact1, const Contact_t contact2)
+{
+    //int res = strcmp(contact1.lastName, contact2.lastName);
+    int res = strcoll(contact1.lastName, contact2.lastName);
+    if (res)
+        return res;
+    //res = strcmp(contact1.firstName, contact2.firstName);
+    res = strcoll(contact1.firstName, contact2.firstName);
+    return res;
+}
+
 Contact_t* clearContact(Contact_t* contact)
 {
     if (!contact)
@@ -52,7 +65,7 @@ Contact_t* newContact(
     char** socials 
 )
 {
-    if (!lastName || !firstName)
+    if (contactsCount + 1 > MAX_CONTACTS_COUNT || !lastName || !firstName)
         return NULL;
     Contact_t* contact = (Contact_t*)malloc(sizeof(Contact_t));
     if (!contact)
@@ -69,7 +82,7 @@ Contact_t* newContact(
         free(contact);
         return NULL;
     }
-
+    contactsCount++;
     return contact;
 }
 
