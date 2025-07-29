@@ -1,7 +1,7 @@
 #include "contactListIO.h"
 
 List_t contactList;
-size_t contactsCount = 0;
+// size_t contactsCount = 0;
 
 int main(void)
 {
