@@ -1,15 +1,11 @@
 #include "../unity/unity.h"
 #include "../src/contacts.h"
 
-#include "../src/contactListIO.h"
-
 #include <stdarg.h>
 
 Contact_t* contact1;
 Contact_t* contact2;
 Contact_t* contact3;
-
-// size_t contactsCount;
 
 #define FIELD_ALLC_CHECK(field, fieldname) \
     if (!field) \

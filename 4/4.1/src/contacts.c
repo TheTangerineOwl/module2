@@ -1,6 +1,35 @@
 #include "contacts.h"
 
-// extern size_t contactsCount;
+#ifndef ERR_STREAM
+#define ERR_STREAM stderr
+#endif
+
+#ifndef RETURN_NULL_WITH_MSG
+#include <stdarg.h>
+#define DEBUG_ERR 0
+
+#if DEBUG_ERR
+    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
+        { \
+            fprintf(ERR_STREAM, formatMsg, ##__VA_ARGS__); \
+            return NULL; \
+        }
+    #else
+    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
+        { \
+            return NULL; \
+        }
+    #endif
+#endif
+
+#define CHANGE_IF_GIVEN(buffer, fieldName, fieldPtr, maxSize, newValue) \
+    if (newValue) { \
+        buf = NULL; \
+        if (fieldPtr) fieldPtr = NULL; \
+        if (!(buf = changeField(fieldPtr, newValue, maxSize))) \
+            RETURN_NULL_WITH_MSG("copyToContact:can't change field '%s'\n", fieldName); \
+        fieldPtr = buf; \
+    }
 
 int compareContacts(const Contact_t contact1, const Contact_t contact2)
 {
@@ -23,7 +52,7 @@ int compareContacts(const Contact_t contact1, const Contact_t contact2)
 Contact_t* clearContact(Contact_t* contact)
 {
     if (!contact)
-        return NULL;
+        RETURN_NULL_WITH_MSG("clearContact: got parameter 'contact' == NULL\n");
     CLEAR_ALLC(contact->lastName);
     CLEAR_ALLC(contact->firstName);
     CLEAR_ALLC(contact->patronim);
@@ -45,7 +74,6 @@ Contact_t* clearContact(Contact_t* contact)
     {
         for (size_t i = 0; i < contact->emailCount; i++)
             contact = contactDeleteEmail(contact, 0);
-            // free(contact->emails[i]);
         CLEAR_ALLC(contact->emails);
         contact->emailCount = 0;
     }
@@ -73,14 +101,13 @@ Contact_t* newContact(
     char** socials 
 )
 {
-    //if (contactsCount + 1 > MAX_CONTACTS_COUNT || !lastName || !firstName)
     if (!lastName || !firstName)
-        return NULL;
+        RETURN_NULL_WITH_MSG("newContact:'lastName' or 'firstName' was NULL\n");
     if (strlen(lastName) < 1 || strlen(firstName) < 1)
-        return NULL;
+        RETURN_NULL_WITH_MSG("newContact:'lastName' or 'firstName' was empty\n");
     Contact_t* contact = (Contact_t*)malloc(sizeof(Contact_t));
     if (!contact)
-        return NULL;
+        RETURN_NULL_WITH_MSG("newContact:'contact' was NULL\n");
 
     if (!copyToContact(contact,
         lastName, firstName, patronim,
@@ -91,9 +118,9 @@ Contact_t* newContact(
     {
         clearContact(contact);
         free(contact);
+        RETURN_NULL_WITH_MSG("newContact:'copyToContact' returned NULL\n");
         return NULL;
     }
-    // contactsCount++;
     return contact;
 }
 
@@ -113,7 +140,7 @@ Contact_t* editContact(
 )
 {
     if (!contact)
-        return NULL;
+        RETURN_NULL_WITH_MSG("editContact:'contact' was NULL\n");
 
     if (!copyToContact(contact,
         lastName, firstName, patronim,
@@ -121,46 +148,19 @@ Contact_t* editContact(
         workPhone, personalPhone, homePhone, extraPhone,
         emails, socials
     ))
-        return NULL;
-
-    // if (emails)
-    // {
-    //     if (contact->emails)
-    //     {
-    //         size_t j = 0;
-    //         for (; j < contact->emailCount; j++)
-    //             if (emails[j])
-    //                 contactEditEmail(contact, j, emails[j]);
-    //         for (; emails[j] && j < MAX_EMAILS_COUNT; j++)
-    //             contactAddEmail(contact, emails[j]);
-    //     }
-    //     else
-    //         for (size_t i = 0; emails[i] && i < MAX_EMAILS_COUNT; i++)
-    //             contactAddEmail(contact, emails[i]);
-    // }
-    // if (socials)
-    // {
-    //     if (contact->socialsLink)
-    //     {
-    //         size_t j = 0;
-    //         for (; j < contact->socialsCount; j++)
-    //             if (socials[j])
-    //                 contactEditSocial(contact, j, socials[j]);
-    //         for (; socials[j] && j < MAX_SOCIALS_COUNT; j++)
-    //             contactAddSocial(contact, socials[j]);
-    //     }
-    //     else
-    //         for (size_t i = 0; socials[i] && i < MAX_EMAILS_COUNT; i++)
-    //             contactAddSocial(contact, emails[i]);
-    // }
+        RETURN_NULL_WITH_MSG("editContact:'copyToContact' returned NULL\n");
 
     return contact;
 }
 
 Contact_t* contactAddEmail(Contact_t* contact, const char* email)
 {
-    if (!contact || !email || contact->emailCount >= MAX_EMAILS_COUNT)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactAddEmail:'contact' was NULL\n");
+    if (!email)
+        RETURN_NULL_WITH_MSG("contactAddEmail:'email' was NULL\n");
+    if (contact->emailCount >= MAX_EMAILS_COUNT)
+        RETURN_NULL_WITH_MSG("contactAddEmail:'emailCount' at max\n");
 
     size_t length = strlen(email);
     if (length >= MAX_EMAIL_LENGTH)
@@ -169,12 +169,12 @@ Contact_t* contactAddEmail(Contact_t* contact, const char* email)
     size_t newCount = contact->emailCount + 1;
     char** newEmails = (char**)realloc(contact->emails, sizeof(char*) * newCount);
     if (!newEmails)
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactAddEmail:'newEmails' was NULL\n");
 
     contact->emails = newEmails;
     contact->emails[contact->emailCount] = (char*)malloc((length + 1) * sizeof(char));
     if (!contact->emails[contact->emailCount])
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactAddEmail:'contact->emails[contact->emailCount]' was NULL\n");
 
     strncpy(contact->emails[contact->emailCount], email, length);
     contact->emails[contact->emailCount][length] = '\0';
@@ -185,8 +185,12 @@ Contact_t* contactAddEmail(Contact_t* contact, const char* email)
 
 Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink)
 {
-    if (!contact || !socialLink || contact->socialsCount >= MAX_SOCIALS_COUNT)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactAddSocial:'contact' was NULL\n");
+    if (!socialLink)
+        RETURN_NULL_WITH_MSG("contactAddSocial:'socialLink' was NULL\n");
+    if (contact->socialsCount >= MAX_SOCIALS_COUNT)
+        RETURN_NULL_WITH_MSG("contactAddSocial:socialsCount at max\n");
 
     size_t length = strlen(socialLink);
     if (length >= SOCIALS_LINK_LENGTH)
@@ -195,12 +199,12 @@ Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink)
     size_t newCount = contact->socialsCount + 1;
     char** newSocials = (char**)realloc(contact->socialsLink, sizeof(char*) * newCount);
     if (!newSocials)
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactAddSocial:'newSocials' was NULL\n");
 
     contact->socialsLink = newSocials;
     contact->socialsLink[contact->socialsCount] = (char*)malloc((length + 1) * sizeof(char));
     if (!contact->socialsLink[contact->socialsCount])
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactAddSocial:'contact->socialsLink[contact->socialsCount]' was NULL\n");
 
     strncpy(contact->socialsLink[contact->socialsCount], socialLink, length);
     contact->socialsLink[contact->socialsCount][length] = '\0';
@@ -211,14 +215,20 @@ Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink)
 
 Contact_t* contactEditEmail(Contact_t* contact, const size_t index, const char* newValue)
 {
-    if (!contact || !newValue || !contact->emails || index >= contact->emailCount)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactEditEmail:'contact' was NULL\n");
+    if (!newValue)
+        RETURN_NULL_WITH_MSG("contactEditEmail:'newValue' was NULL\n");
+    if (!contact->emails)
+        RETURN_NULL_WITH_MSG("contactEditEmail:'contact->emails' was NULL\n");
+    if (index >= contact->emailCount)
+        RETURN_NULL_WITH_MSG("contactEditEmail:index out of range\n");
     size_t size = strlen(newValue);
     if (size >= MAX_EMAIL_LENGTH)
         size = MAX_EMAIL_LENGTH - 1;
     char * newEmail = (char*)realloc(contact->emails[index], (size + 1) * sizeof(char));
     if (!newEmail)
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactEditEmail:'newEmail' was NULL\n");
     contact->emails[index] = newEmail;
 
     strncpy(contact->emails[index], newValue, size);
@@ -229,14 +239,20 @@ Contact_t* contactEditEmail(Contact_t* contact, const size_t index, const char* 
 
 Contact_t* contactEditSocial(Contact_t* contact, const size_t index, const char* newValue)
 {
-    if (!contact || !newValue || !contact->socialsLink || index >= contact->socialsCount)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactEditSocial:'contact' was NULL\n");
+    if (!newValue)
+        RETURN_NULL_WITH_MSG("contactEditSocial:'newValue' was NULL\n");
+    if (!contact->socialsLink)
+        RETURN_NULL_WITH_MSG("contactEditSocial:'contact->socialsLink' was NULL\n");
+    if (index >= contact->socialsCount)
+        RETURN_NULL_WITH_MSG("contactEditSocial:index out of range\n");
     size_t size = strlen(newValue);
     if (size >= SOCIALS_LINK_LENGTH)
         size = SOCIALS_LINK_LENGTH - 1;
     char * newSocial = (char*)realloc(contact->socialsLink[index], (size + 1) * sizeof(char));
     if (!newSocial)
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactEditSocial:'newSocial' was NULL\n");
     contact->socialsLink[index] = newSocial;
 
     strncpy(contact->socialsLink[index], newValue, size);
@@ -247,10 +263,14 @@ Contact_t* contactEditSocial(Contact_t* contact, const size_t index, const char*
 
 Contact_t* contactDeleteEmail(Contact_t* contact, const size_t index)
 {
-    if (!contact || !contact->emails || index >= contact->emailCount)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactDeleteEmail:'contact' was NULL\n");
+    if (!contact->emails)
+        RETURN_NULL_WITH_MSG("contactDeleteEmail:'contact->emails' was NULL\n");
+    if (index >= contact->emailCount)
+        RETURN_NULL_WITH_MSG("contactDeleteEmail:index out of range\n");
     if (!contact->emails[index])
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactDeleteEmail:email at index doen't exist\n");
     free(contact->emails[index]);
     for (size_t i = index; i < contact->emailCount; i++)
         contact->emails[i] = contact->emails[i + 1];
@@ -260,10 +280,14 @@ Contact_t* contactDeleteEmail(Contact_t* contact, const size_t index)
 
 Contact_t* contactDeleteSocial(Contact_t* contact, const size_t index)
 {
-    if (!contact || !contact->socialsLink || index >= contact->socialsCount)
-        return NULL;
+    if (!contact)
+        RETURN_NULL_WITH_MSG("contactDeleteSocial:'contact' was NULL\n");
+    if (!contact->socialsLink)
+        RETURN_NULL_WITH_MSG("contactDeleteSocial:'contact->socialsLink' was NULL\n");
+    if (index >= contact->socialsCount)
+        RETURN_NULL_WITH_MSG("contactDeleteSocial:index out of range\n");
     if (!contact->socialsLink[index])
-        return NULL;
+        RETURN_NULL_WITH_MSG("contactDeleteSocial:socials link at index doen't exist\n");
     free(contact->socialsLink[index]);
     for (size_t i = index; i < contact->socialsCount; i++)
         contact->socialsLink[i] = contact->socialsLink[i + 1];
@@ -279,9 +303,12 @@ static char* changeField(char* fieldPtr, const char* newValue, size_t maxSize)
         size = strlen(newValue) + 1;
         if (size >= maxSize)
             size = maxSize;
-        fieldPtr = (char *)realloc(fieldPtr, size * sizeof(char));
+        if (fieldPtr)
+            fieldPtr = (char*)realloc(fieldPtr, size * sizeof(char));
+        else
+            fieldPtr = (char*)malloc(size * sizeof(char));
         if (!fieldPtr)
-            return NULL;
+            RETURN_NULL_WITH_MSG("changeField:'fieldPtr' couldn't be allocated\n");
         strncpy(fieldPtr, newValue, size);
         fieldPtr[size - 1] = '\0';
     }
@@ -304,67 +331,42 @@ Contact_t* copyToContact(
 )
 {
     if (!contact)
-        return NULL;
+        RETURN_NULL_WITH_MSG("copyToContact:'contact' was NULL\n");
 
-    if (
-        (lastName && strlen(lastName) < 1) ||
-        (firstName && strlen(firstName) < 1)
-    )
-        return NULL;
+    if (lastName && strlen(lastName) < 1)
+        RETURN_NULL_WITH_MSG("copyToContact:'lastName' was NULL or empty\n");
+    if (firstName && strlen(firstName) < 1)
+        RETURN_NULL_WITH_MSG("copyToContact:'firstName' was NULL or empty\n");
     char* buf = NULL;
 
-    if (!(buf = changeField(contact->lastName, lastName, LAST_NAME_LENGTH)))
-        return NULL;
-    contact->lastName = buf;
-    if (!(buf = changeField(contact->firstName, firstName, FIRST_NAME_LENGTH)))
-        return NULL;
-    contact->firstName = buf;
-    if (!(buf = changeField(contact->patronim, patronim, PATRONIM_LENGTH)))
-        return NULL;
-    contact->patronim = buf;
+    CHANGE_IF_GIVEN(buf, "lastName", contact->lastName, LAST_NAME_LENGTH, lastName);
+    CHANGE_IF_GIVEN(buf, "firstName", contact->firstName, FIRST_NAME_LENGTH, firstName);
+    CHANGE_IF_GIVEN(buf, "patronim", contact->patronim, PATRONIM_LENGTH, patronim);
 
     if (workPlace || position)
     {
         if (!contact->workInfo)
             contact->workInfo = (Work_t*)calloc(1, sizeof(Work_t));
-        if (!(buf = changeField(contact->workInfo->workPlace, workPlace, COMPANY_NAME_LENGTH)))
-            return NULL;
-        contact->workInfo->workPlace = buf;
-        if (!(buf = changeField(contact->workInfo->position, position, POSITION_LENGTH)))
-            return NULL;
-        contact->workInfo->position = buf;
+        CHANGE_IF_GIVEN(buf, "workInfo->workPlace", contact->workInfo->workPlace,
+            COMPANY_NAME_LENGTH, workPlace);
+        CHANGE_IF_GIVEN(buf, "workInfo->position", contact->workInfo->position,
+            POSITION_LENGTH, position);
     }
 
     if (workPhone || personalPhone || homePhone || extraPhone)
     {
         if (!contact->numbers)
             contact->numbers = (PhoneNumbers_t*)calloc(1, sizeof(PhoneNumbers_t));
-        if (!(buf = changeField(contact->numbers->work, workPhone, PHONE_NUMBER_LENGTH)))
-            return NULL;
-        contact->numbers->work = buf;
-        if (!(buf = changeField(contact->numbers->personal, personalPhone, PHONE_NUMBER_LENGTH)))
-            return NULL;
-        contact->numbers->personal = buf;
-        if (!(buf = changeField(contact->numbers->home, homePhone, PHONE_NUMBER_LENGTH)))
-            return NULL;
-        contact->numbers->home = buf;
-        if (!(buf = changeField(contact->numbers->extra, extraPhone, PHONE_NUMBER_LENGTH)))
-            return NULL;
-        contact->numbers->extra = buf;
-    }
 
-    // if (emails)
-    //     for (size_t i = 0; emails[i] && i < MAX_EMAILS_COUNT; i++)
-    //     {
-    //         if (!contactAddEmail(contact, emails[i]))
-    //             printf("Не удалось добавить почту %lu (%s)!", i, emails[i]);
-    //     }
-    // if (socials)
-    //     for (size_t i = 0; socials[i] && i < MAX_SOCIALS_COUNT; i++)
-    //     {
-    //         if (!contactAddSocial(contact, socials[i]))
-    //             printf("Не удалось добавить ссылку на соцсеть %lu (%s)!", i, socials[i]);
-    //     }
+        CHANGE_IF_GIVEN(buf, "numbers->work", contact->numbers->work,
+            PHONE_NUMBER_LENGTH, workPhone);
+        CHANGE_IF_GIVEN(buf, "numbers->personalPhone", contact->numbers->personal,
+            PHONE_NUMBER_LENGTH, personalPhone);
+        CHANGE_IF_GIVEN(buf, "numbers->homePhone", contact->numbers->home,
+            PHONE_NUMBER_LENGTH, homePhone);
+        CHANGE_IF_GIVEN(buf, "numbers->extraPhone", contact->numbers->extra,
+            PHONE_NUMBER_LENGTH, extraPhone);
+    }
 
     if (emails)
     {

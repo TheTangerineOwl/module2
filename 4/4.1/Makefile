@@ -32,7 +32,7 @@ test: $(TEST_TARGETS)
 	@echo "Running all tests..."
 	@for test in $(TEST_TARGETS); do \
 		echo "==== Running $$test ===="; \
-# 		./$$test || exit 1; \
+		./$$test || exit 1; \
 	done
 
 .PHONY: clean
