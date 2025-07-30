@@ -48,8 +48,7 @@ void test_listClear(void)
 
 void test_listGetAt(void)
 {
-    TEST_ASSERT_NULL(listGetAt(NULL, 0));
-    TEST_ASSERT_NULL(listGetAt(&contactList, 0));
+    TEST_ASSERT_NULL(listGetAt(contactList, 0));
 
     Item_t* item1 = listAddCreate(
         &contactList,
@@ -69,12 +68,12 @@ void test_listGetAt(void)
     );
     Contact_t* contact2 = item2->contact;
 
-    Item_t* got = listGetAt(&contactList, 0);
+    Item_t* got = listGetAt(contactList, 0);
     TEST_ASSERT_NOT_NULL(got);
     TEST_ASSERT_NOT_NULL(got->contact);
     TEST_ASSERT_EQUAL_PTR(contact1, got->contact);
     TEST_ASSERT_EQUAL_PTR(contactList.head, got);
-    got = listGetAt(&contactList, 1);
+    got = listGetAt(contactList, 1);
     TEST_ASSERT_NOT_NULL(got);
     TEST_ASSERT_NOT_NULL(got->contact);
     TEST_ASSERT_EQUAL_PTR(contact2, got->contact);
@@ -89,7 +88,7 @@ void test_listGetAt(void)
     );
     Contact_t* contact3 = item3->contact;
 
-    got = listGetAt(&contactList, 1);
+    got = listGetAt(contactList, 1);
     TEST_ASSERT_NOT_NULL(got);
     TEST_ASSERT_NOT_NULL(got->contact);
 

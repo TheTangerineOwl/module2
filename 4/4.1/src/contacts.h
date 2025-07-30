@@ -16,6 +16,28 @@
 #define MAX_EMAILS_COUNT 5
 #define MAX_CONTACTS_COUNT 100
 
+#ifndef ERR_STREAM
+#define ERR_STREAM stderr
+#endif
+
+#ifndef RETURN_NULL_WITH_MSG
+
+#define DEBUG_ERR 0
+
+#if DEBUG_ERR
+    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
+        { \
+            fprintf(ERR_STREAM, formatMsg, ##__VA_ARGS__); \
+            return NULL; \
+        }
+    #else
+    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
+        { \
+            return NULL; \
+        }
+    #endif
+#endif
+
 typedef struct Work_t
 {
     char* workPlace;

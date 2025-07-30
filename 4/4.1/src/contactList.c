@@ -2,28 +2,6 @@
 
 extern List_t contactList;
 
-#ifndef ERR_STREAM
-#define ERR_STREAM stderr
-#endif
-
-#ifndef RETURN_NULL_WITH_MSG
-
-#define DEBUG_ERR 0
-
-#if DEBUG_ERR
-    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
-        { \
-            fprintf(ERR_STREAM, formatMsg, ##__VA_ARGS__); \
-            return NULL; \
-        }
-    #else
-    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
-        { \
-            return NULL; \
-        }
-    #endif
-#endif
-
 List_t* listInit(List_t* list)
 {
     List_t* bufList = (List_t*)malloc(sizeof(List_t));
@@ -37,23 +15,21 @@ List_t* listInit(List_t* list)
     return list;
 }
 
-Item_t* listGetAt(List_t* list, const size_t index)
+Item_t* listGetAt(const List_t list, const size_t index)
 {
-    if (!list)
-        RETURN_NULL_WITH_MSG("listGetAt:'list' was NULL\n");
-    if (index >= list->length)
+    if (index >= list.length)
         RETURN_NULL_WITH_MSG("listGetAt: index out of range\n");
     Item_t* item = NULL;
-    if (index < list->length / 2.0)
+    if (index < list.length / 2.0)
     {
-        item = list->head;
+        item = list.head;
         for (size_t i = 0; i < index; i++)
             item = item->next;
     }
     else
     {
-        item = list->tail;
-        for (size_t i = list->length - 1; i > index; i--)
+        item = list.tail;
+        for (size_t i = list.length - 1; i > index; i--)
             item = item->prev;
     }
     return item;
@@ -179,7 +155,7 @@ Contact_t* listRemoveAt(List_t* list, const size_t index)
     Item_t* buffer;
     Contact_t* res;
 
-    buffer = listGetAt(list, index);
+    buffer = listGetAt(*list, index);
     if (!buffer)
         RETURN_NULL_WITH_MSG("listRemoveAt: 'listGetAt' returned NULL\n");
     Item_t* prev = buffer->prev, *next = buffer->next;

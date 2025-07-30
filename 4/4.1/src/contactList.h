@@ -24,7 +24,7 @@ extern List_t contactList;
 // extern size_t contactsCount;
 
 List_t* listInit(List_t* list);
-Item_t* listGetAt(List_t* list, const size_t index);
+Item_t* listGetAt(const List_t list, const size_t index);
 Item_t* listAddCreate(
     List_t* list,
     const char* lastName,

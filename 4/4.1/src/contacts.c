@@ -1,27 +1,5 @@
 #include "contacts.h"
 
-#ifndef ERR_STREAM
-#define ERR_STREAM stderr
-#endif
-
-#ifndef RETURN_NULL_WITH_MSG
-#include <stdarg.h>
-#define DEBUG_ERR 0
-
-#if DEBUG_ERR
-    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
-        { \
-            fprintf(ERR_STREAM, formatMsg, ##__VA_ARGS__); \
-            return NULL; \
-        }
-    #else
-    #define RETURN_NULL_WITH_MSG(formatMsg, ...) \
-        { \
-            return NULL; \
-        }
-    #endif
-#endif
-
 #define CHANGE_IF_GIVEN(buffer, fieldName, fieldPtr, maxSize, newValue) \
     if (newValue) { \
         buf = NULL; \

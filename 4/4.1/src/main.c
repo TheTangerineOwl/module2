@@ -5,100 +5,96 @@ List_t contactList;
 
 int main(void)
 {
-    if (!listInit(&contactList))
+    listInit(&contactList);
+
+    size_t choice;
+    int exitFlag = 0;
+    Item_t* currentContact;
+
+    char c;
+
+    while (!exitFlag)
     {
-        fprintf(stderr, "Не удалось создать список!\n");
-        return 1;
+        puts("\nВыберите опцию:");
+        puts("1. Добавление контакта;");
+        puts("2. Редактирование контакта;");
+        puts("3. Удаление контакта;");
+        puts("4. Вывод информации о контакте;");
+        puts("5. Вывести все контакты;");
+        printf("6. Выход. Ваш выбор: ");
+
+        while (!scanf("%ld", &choice) || choice < 1 || choice > 6)
+        {
+            puts("Некорректный выбор! Попробуйте еще раз.\n");
+            while ((c = getchar() != '\n') && c != EOF);
+        }
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        switch (choice)
+        {
+        case 1:
+            enterContactInfo(&contactList);
+            break;
+        case 2:
+        {
+            currentContact = chooseContact(contactList);
+            if (!currentContact)
+            {
+                puts("Ошибка выбора контакта!");
+                continue;
+            }
+            editContactInfo(&contactList, currentContact);
+        }
+        break;
+        case 3:
+        {
+            if (!contactList.length)
+            {
+                puts("Нет контактов для удаления!");
+                continue;
+            }
+            puts("Все контакты:");
+            printShortContacts(contactList);
+            printf("Выберите индекс контакта для удаления: ");
+            size_t choice;
+            while (!scanf("%ld", &choice) || choice < 1 || choice > contactList.length)
+            {
+                printf("Некорректный выбор! Попробуйте еще раз.\n");
+                while ((c = getchar() != '\n') && c != EOF);
+            }
+            while ((c = getchar()) != '\n' && c != EOF);
+            Contact_t* removed = listRemoveAt(&contactList, choice - 1);
+            if (removed)
+            {
+                clearContact(removed);
+                free(removed);
+            }
+        }
+        break;
+        case 4:
+        {
+            currentContact = chooseContact(contactList);
+            if (!currentContact)
+            {
+                puts("Ошибка выбора контакта!");
+                continue;
+            }
+            printContact(*currentContact->contact);
+        }
+        break;
+        case 5:
+            printShortContacts(contactList);
+            break;
+        case 6:
+            exitFlag = 1;
+            break;
+        default:
+            printf("Некорректный выбор! Попробуйте еще раз.\n");
+            break;
+        }
     }
 
-    char* emails[] = {"test@example.com", "work@company.org", NULL};
-    char* socials[] = {"vk.com/test", NULL};
-
-    if (!listAddCreate(
-        &contactList,
-        "Fамилия", "Имя", "Отчество",
-        "Company", "Позиция",
-        "1234567890123", "0987654321123", "123456", "123456789012",
-        emails, socials
-    ))
-    {
-        fprintf(stderr, "Не удалось добавить новый контакт!\n");
-        return 1;
-    }
-
-    printContact(*contactList.head->contact);
-
-    char* emails2[] = {"test2@example.com", "work2@company.org", NULL};
-    char* socials2[] = {"vk.com/test2", "auberge.com", NULL};
-
-
-    if (!listAddCreate(
-        &contactList,
-        "Dамилия2", "Имя2", "Отчество2",
-        "Company2", "Позиция2",
-        "12345678901232", "0987654321123", "123456", "123456789012",
-        emails2, socials2
-    ))
-    {
-        fprintf(stderr, "Не удалось добавить новый 2 контакт!\n");
-        return 1;
-    }
-
-    printf("%s %s | %s %s\n",
-        contactList.head->contact->lastName,
-        contactList.head->contact->firstName,
-        contactList.tail->contact->lastName,
-        contactList.tail->contact->firstName
-    );
-
-    Item_t* toEdit = listGetAt(&contactList, 1);
-
-    if (!toEdit || !toEdit->contact)
-    {
-        fprintf(stderr, "Не удалось получить контакт 2!\n");
-        return 1;
-    }
-
-    if (!editContact(
-        toEdit->contact,
-        "NewLastName", NULL, NULL,
-        NULL, NULL,
-        NULL, NULL, NULL, NULL,
-        NULL, NULL
-    ))
-    {
-        fprintf(stderr, "Не удалось отредактировать контакт 2!\n");
-        return 1;
-    }
-
-    if (!listAddCreate(
-        &contactList,
-        "Zамилия2", "Имя2", "Отчество2",
-        "Company2", "Позиция2",
-        "12345678901232", "0987654321123", "123456", "123456789012",
-        emails2, socials2
-    ))
-    {
-        fprintf(stderr, "Не удалось добавить новый 3 контакт!\n");
-        return 1;
-    }
-
-    printf("%s %s | %s %s | %s %s\n",
-        contactList.head->contact->lastName,
-        contactList.head->contact->firstName,
-        contactList.tail->prev->contact->lastName,
-        contactList.tail->prev->contact->firstName,
-        contactList.tail->contact->lastName,
-        contactList.tail->contact->firstName
-    );
-
-    if (!listClear(&contactList))
-    {
-        fprintf(stderr, "Не удалось очистить список!\n");
-        return 1;
-    }
-
-    puts("Cleared");
+    listClear(&contactList);
 
     return 0;
 }
