@@ -50,15 +50,17 @@ Contact_t* clearContact(Contact_t* contact)
     }
     if (contact->emails)
     {
-        for (size_t i = 0; i < contact->emailCount; i++)
-            contact = contactDeleteEmail(contact, 0);
+        // for (size_t i = 0; i < contact->emailCount; i++)
+        //     contact = contactDeleteEmail(contact, 0);
+        while (contactDeleteEmail(contact, 0));
         CLEAR_ALLC(contact->emails);
         contact->emailCount = 0;
     }
     if (contact->socialsLink)
     {
-        for (size_t i = 0; i < contact->socialsCount; i++)
-            contact = contactDeleteSocial(contact, 0);
+        // for (size_t i = 0; i < contact->socialsCount; i++)
+        //     contact = contactDeleteSocial(contact, 0);
+        while (contactDeleteSocial(contact, 0));
         CLEAR_ALLC(contact->socialsLink);
         contact->socialsCount = 0;
     }
@@ -75,7 +77,9 @@ Contact_t* newContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials 
 )
 {
@@ -91,7 +95,7 @@ Contact_t* newContact(
         lastName, firstName, patronim,
         workPlace, position,
         workPhone, personalPhone, homePhone, extraPhone,
-        emails, socials
+        emailCount, emails, socialsCount, socials
     ))
     {
         clearContact(contact);
@@ -113,7 +117,9 @@ Contact_t* editContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 )
 {
@@ -124,7 +130,7 @@ Contact_t* editContact(
         lastName, firstName, patronim,
         workPlace, position,
         workPhone, personalPhone, homePhone, extraPhone,
-        emails, socials
+        emailCount, emails, socialsCount, socials
     ))
         RETURN_NULL_WITH_MSG("editContact:'copyToContact' returned NULL\n");
 
@@ -245,14 +251,25 @@ Contact_t* contactDeleteEmail(Contact_t* contact, const size_t index)
         RETURN_NULL_WITH_MSG("contactDeleteEmail:'contact' was NULL\n");
     if (!contact->emails)
         RETURN_NULL_WITH_MSG("contactDeleteEmail:'contact->emails' was NULL\n");
+    if (!contact->emailCount)
+        return NULL;
     if (index >= contact->emailCount)
         RETURN_NULL_WITH_MSG("contactDeleteEmail:index out of range\n");
     if (!contact->emails[index])
         RETURN_NULL_WITH_MSG("contactDeleteEmail:email at index doen't exist\n");
     free(contact->emails[index]);
+    contact->emails[index] = NULL;
     for (size_t i = index; i < contact->emailCount; i++)
         contact->emails[i] = contact->emails[i + 1];
     contact->emailCount--;
+    if (contact->emailCount)
+    {
+        contact->emails = (char**)realloc(contact->emails, sizeof(char*) * contact->emailCount);
+        if (!contact->emails)
+            RETURN_NULL_WITH_MSG("contactDeleteEmail:'contact->emails' couldn't be reallocated!\n")
+    }
+    else
+        CLEAR_ALLC(contact->emails);
     return contact;
 }
 
@@ -262,14 +279,25 @@ Contact_t* contactDeleteSocial(Contact_t* contact, const size_t index)
         RETURN_NULL_WITH_MSG("contactDeleteSocial:'contact' was NULL\n");
     if (!contact->socialsLink)
         RETURN_NULL_WITH_MSG("contactDeleteSocial:'contact->socialsLink' was NULL\n");
+    if (!contact->socialsCount)
+        return NULL;
     if (index >= contact->socialsCount)
         RETURN_NULL_WITH_MSG("contactDeleteSocial:index out of range\n");
     if (!contact->socialsLink[index])
         RETURN_NULL_WITH_MSG("contactDeleteSocial:socials link at index doen't exist\n");
     free(contact->socialsLink[index]);
+    contact->socialsLink[index] = NULL;
     for (size_t i = index; i < contact->socialsCount; i++)
         contact->socialsLink[i] = contact->socialsLink[i + 1];
     contact->socialsCount--;
+    if (contact->socialsCount)
+    {
+        contact->socialsLink = (char**)realloc(contact->socialsLink, sizeof(char*) * contact->socialsCount);
+        if (!contact->socialsLink)
+            RETURN_NULL_WITH_MSG("contactDeleteSocial:'contact->emails' couldn't be reallocated!\n")
+    }
+    else
+        CLEAR_ALLC(contact->socialsLink);
     return contact;
 }
 
@@ -304,16 +332,18 @@ Contact_t* copyToContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 )
 {
     if (!contact)
         RETURN_NULL_WITH_MSG("copyToContact:'contact' was NULL\n");
 
-    if (lastName && strlen(lastName) < 1)
+    if (!lastName || strlen(lastName) < 1)
         RETURN_NULL_WITH_MSG("copyToContact:'lastName' was NULL or empty\n");
-    if (firstName && strlen(firstName) < 1)
+    if (!firstName || strlen(firstName) < 1)
         RETURN_NULL_WITH_MSG("copyToContact:'firstName' was NULL or empty\n");
     char* buf = NULL;
 
@@ -350,32 +380,59 @@ Contact_t* copyToContact(
     {
         if (contact->emails)
         {
+            size_t minCount = contact->emailCount > emailCount ? emailCount : contact->emailCount;
             size_t j = 0;
-            for (; j < contact->emailCount; j++)
+            for (; j < minCount && j < MAX_EMAILS_COUNT; j++)
                 if (emails[j])
                     contactEditEmail(contact, j, emails[j]);
-            for (; emails[j] && j < MAX_EMAILS_COUNT; j++)
-                contactAddEmail(contact, emails[j]);
+            for (size_t j = minCount; j < emailCount && j < MAX_EMAILS_COUNT; j++)
+                if (emails[j])
+                    contactAddEmail(contact, emails[j]);
         }
         else
-            for (size_t i = 0; emails[i] && i < MAX_EMAILS_COUNT; i++)
+            for (size_t i = 0; i < emailCount && emails[i] && i < MAX_EMAILS_COUNT; i++)
                 contactAddEmail(contact, emails[i]);
     }
     if (socials)
     {
         if (contact->socialsLink)
         {
+            size_t minCount = contact->socialsCount > socialsCount ? socialsCount : contact->socialsCount;
             size_t j = 0;
-            for (; j < contact->socialsCount; j++)
+            for (; j < minCount && j < MAX_SOCIALS_COUNT; j++)
                 if (socials[j])
                     contactEditSocial(contact, j, socials[j]);
-            for (; socials[j] && j < MAX_SOCIALS_COUNT; j++)
-                contactAddSocial(contact, socials[j]);
+            for (size_t j = minCount; j < socialsCount && j < MAX_SOCIALS_COUNT; j++)
+                if (socials[j])
+                    contactAddSocial(contact, socials[j]);
         }
         else
-            for (size_t i = 0; socials[i] && i < MAX_SOCIALS_COUNT; i++)
+            for (size_t i = 0; i < socialsCount && socials[i] && i < MAX_SOCIALS_COUNT; i++)
                 contactAddSocial(contact, socials[i]);
     }
 
     return contact;
+}
+
+Contact_t* createCopy(Contact_t* contact)
+{
+    Contact_t* copy = (Contact_t*)malloc(sizeof(Contact_t));
+    if (!copy)
+        RETURN_NULL_WITH_MSG("createCopy: не удалось создать копию!\n");
+
+    copy = copyToContact(
+        copy,
+        contact->lastName, contact->firstName, contact->patronim,
+        contact->workInfo ? contact->workInfo->workPlace : NULL,
+        contact->workInfo ? contact->workInfo->position : NULL,
+        contact->numbers ? contact->numbers->work : NULL,
+        contact->numbers ? contact->numbers->personal : NULL,
+        contact->numbers ? contact->numbers->home : NULL,
+        contact->numbers ? contact->numbers->extra : NULL,
+        contact->emailCount, contact->emails,
+        contact->socialsCount, contact->socialsLink);
+    if (!copy)
+        RETURN_NULL_WITH_MSG("createCopy: не удалось скопировать данные контакта!\n");
+
+    return copy;
 }

@@ -80,7 +80,9 @@ Contact_t* newContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials 
 );
 
@@ -95,7 +97,9 @@ Contact_t* editContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 );
 
@@ -110,9 +114,13 @@ Contact_t* copyToContact(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 );
+
+Contact_t* createCopy(Contact_t* contact);
 
 Contact_t* contactAddEmail(Contact_t* contact, const char* email);
 Contact_t* contactAddSocial(Contact_t* contact, const char* socialLink);

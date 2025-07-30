@@ -178,15 +178,15 @@ void test_copyToContact(void)
     TEST_ASSERT_NULL(copyToContact(
         NULL,
         "1", "1", "", "", "", "", "", "", "",
-        NULL, NULL));
+        0, NULL, 0, NULL));
     TEST_ASSERT_NULL(copyToContact(
         contact1,
         "", "1", "", "", "", "", "", "", "",
-        NULL, NULL));
+        0, NULL, 0, NULL));
     TEST_ASSERT_NULL(copyToContact(
         contact1,
         "1", "", "", "", "", "", "", "", "",
-        NULL, NULL));
+        0, NULL, 0, NULL));
 
     Work_t* testWork = (Work_t*)malloc(sizeof(Work_t));
     PhoneNumbers_t* testNumbers = (PhoneNumbers_t*)malloc(sizeof(PhoneNumbers_t));
@@ -228,7 +228,7 @@ void test_copyToContact(void)
         testContact->workInfo->workPlace, testContact->workInfo->position,
         testContact->numbers->work, testContact->numbers->personal,
         testContact->numbers->home, testContact->numbers->extra,
-        testContact->emails, testContact->socialsLink
+        MAX_EMAILS_COUNT, testContact->emails, MAX_SOCIALS_COUNT, testContact->socialsLink
     );
     TEST_ASSERT_NOT_NULL(copiedContact);
     TEST_ASSERT_EQUAL_PTR(contact1, copiedContact);
@@ -243,7 +243,7 @@ void test_copyToContact(void)
         "TestNewLastName", "TestNewFirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     
     TEST_ASSERT_NOT_NULL(copiedContact);
@@ -261,7 +261,7 @@ void test_copyToContact(void)
         testContact->lastName, testContact->firstName, NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        testContact->emails, testContact->socialsLink
+        MAX_EMAILS_COUNT, testContact->emails, MAX_SOCIALS_COUNT, testContact->socialsLink
     );
     
     TEST_ASSERT_NOT_NULL(copiedContact);
@@ -273,8 +273,8 @@ void test_copyToContact(void)
 
 void test_newContact(void)
 {
-    TEST_ASSERT_NULL(newContact("", "1", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
-    TEST_ASSERT_NULL(newContact("1", "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+    TEST_ASSERT_NULL(newContact("", "1", NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL));
+    TEST_ASSERT_NULL(newContact("1", "", NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL));
 
     Work_t* testWork = (Work_t*)malloc(sizeof(Work_t));
     PhoneNumbers_t* testNumbers = (PhoneNumbers_t*)malloc(sizeof(PhoneNumbers_t));
@@ -315,7 +315,7 @@ void test_newContact(void)
         testContact->workInfo->workPlace, testContact->workInfo->position,
         testContact->numbers->work, testContact->numbers->personal,
         testContact->numbers->home, testContact->numbers->extra,
-        testContact->emails, testContact->socialsLink
+        MAX_EMAILS_COUNT, testContact->emails, MAX_SOCIALS_COUNT, testContact->socialsLink
     );
 
     TEST_ASSERT_NOT_NULL(newC);
@@ -326,7 +326,7 @@ void test_newContact(void)
 void test_editContact(void)
 {
     TEST_ASSERT_NULL(editContact(NULL,
-        "1", "1", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+        "1", "1", NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, NULL));
 
     Work_t* testWork = (Work_t*)malloc(sizeof(Work_t));
     PhoneNumbers_t* testNumbers = (PhoneNumbers_t*)malloc(sizeof(PhoneNumbers_t));
@@ -368,7 +368,7 @@ void test_editContact(void)
         testContact->workInfo->workPlace, testContact->workInfo->position,
         testContact->numbers->work, testContact->numbers->personal,
         testContact->numbers->home, testContact->numbers->extra,
-        testContact->emails, testContact->socialsLink
+        MAX_EMAILS_COUNT, testContact->emails, MAX_SOCIALS_COUNT, testContact->socialsLink
     );
 
     TEST_ASSERT_NOT_NULL(newContact);
@@ -436,7 +436,8 @@ void test_contactDeleteEmail(void)
     contact->emails = NULL;
     TEST_ASSERT_NULL(contactDeleteEmail(contact, 0));
     contact->emails = emails;
-
+    printf("Here %p %lu\n", contact->emails, contact->emailCount);
+    fflush(stdout);
     TEST_ASSERT_NOT_NULL(contactDeleteEmail(contact, 0));
     TEST_ASSERT_EQUAL(count - 1, contact->emailCount);
 }

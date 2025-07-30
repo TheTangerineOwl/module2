@@ -46,7 +46,9 @@ Item_t* listAddCreate(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 )
 {
@@ -56,7 +58,7 @@ Item_t* listAddCreate(
         lastName, firstName, patronim,
         workPlace, position,
         workPhone, personalPhone, homePhone, extraPhone,
-        emails, socials
+        emailCount, emails, socialsCount, socials
     );
     if (!contact)
     {
@@ -150,6 +152,8 @@ Contact_t* listRemoveAt(List_t* list, const size_t index)
 {
     if (!list)
         RETURN_NULL_WITH_MSG("listRemoveAt: 'list' was NULL\n");
+    if (list->length == 0)
+        return NULL;
     if (index >= list->length)
         RETURN_NULL_WITH_MSG("listRemoveAt: index out of range\n");
     Item_t* buffer;
@@ -227,7 +231,9 @@ Item_t* listEdit(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 )
 {
@@ -240,7 +246,7 @@ Item_t* listEdit(
         lastName, firstName, patronim,
         workPlace, position,
         workPhone, personalPhone, homePhone, extraPhone,
-        emails, socials
+        emailCount, emails, socialsCount, socials
     );
     if (!edited)
         RETURN_NULL_WITH_MSG("listEdit: 'editContact' returned NULL\n");

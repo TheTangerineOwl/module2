@@ -76,7 +76,7 @@ void printContact(const Contact_t contact)
     {
         for (size_t i = 0; i < contact.socialsCount; i++)
         {
-            if (!contact.emails[i] || !(contact.emails[i][0]))
+            if (!contact.socialsLink[i] || !(contact.socialsLink[i][0]))
                 break;
             printf("%s %lu: %s\n", menuItems[SOCIAL_LINK].name, i + 1, contact.socialsLink[i]);
         }
@@ -164,18 +164,19 @@ Item_t *enterContactInfo(List_t *list)
     if (!emails || !socialsLink)
         return NULL;
 
-    for (size_t i = 0; i < MAX_EMAILS_COUNT; i++)
+    size_t emailCount = 0;
+    for (; emailCount < MAX_EMAILS_COUNT; emailCount++)
     {
-        printf("Введите электронную почту %ld (пустая строка для пропуска): ", i + 1);
-        emails = (char**)realloc(emails, sizeof(char*) * (i + 1));
-        emails[i] = NULL;
+        printf("Введите электронную почту %ld (пустая строка для пропуска): ", emailCount + 1);
+        emails = (char**)realloc(emails, sizeof(char*) * (emailCount + 1));
+        emails[emailCount] = NULL;
         if (!emails)
             break;
-        emails[i] = enterStrField(emails[i], MAX_EMAIL_LENGTH);
-        if (!emails[i])
+        emails[emailCount] = enterStrField(emails[emailCount], MAX_EMAIL_LENGTH);
+        if (!emails[emailCount])
         {
-            if (i)
-                emails = (char**)realloc(emails, sizeof(char*) * i);
+            if (emailCount)
+                emails = (char**)realloc(emails, sizeof(char*) * emailCount);
             else
             {
                 free(emails);
@@ -184,18 +185,19 @@ Item_t *enterContactInfo(List_t *list)
             break;
         }
     }
-    for (size_t i = 0; i < MAX_SOCIALS_COUNT; i++)
+    size_t socialsCount = 0;
+    for (; socialsCount < MAX_SOCIALS_COUNT; socialsCount++)
     {
-        printf("Введите ссылку на соцсети или профиль %ld (пустая строка для пропуска): ", i + 1);
-        socialsLink = (char**)realloc(socialsLink, sizeof(char*) * (i + 1));
-        socialsLink[i] = NULL;
+        printf("Введите ссылку на соцсети или профиль %ld (пустая строка для пропуска): ", socialsCount + 1);
+        socialsLink = (char**)realloc(socialsLink, sizeof(char*) * (socialsCount + 1));
+        socialsLink[socialsCount] = NULL;
         if (!socialsLink)
             break;
-        socialsLink[i] = enterStrField(socialsLink[i], SOCIALS_LINK_LENGTH);
-        if (!socialsLink[i])
+        socialsLink[socialsCount] = enterStrField(socialsLink[socialsCount], SOCIALS_LINK_LENGTH);
+        if (!socialsLink[socialsCount])
         {
-            if (i)
-                socialsLink = (char**)realloc(socialsLink, sizeof(char*) * i);
+            if (socialsCount)
+                socialsLink = (char**)realloc(socialsLink, sizeof(char*) * socialsCount);
             else
             {
                 free(socialsLink);
@@ -209,14 +211,14 @@ Item_t *enterContactInfo(List_t *list)
                                     lastName, firstName, patronim,
                                     workPlace, position,
                                     work, personal, home, extra,
-                                    emails, socialsLink);
+                                    emailCount, emails, socialsCount, socialsLink);
     printContact(*contact->contact);
     return contact;
 }
 
 Item_t *editContactInfo(List_t *list, Item_t *contact)
 {
-    Contact_t newValues; // = *contact->contact;
+    Contact_t* newValues; // = *contact->contact;
     Contact_t *old = contact->contact;
 
     int exitFlag = 0;
@@ -224,21 +226,15 @@ Item_t *editContactInfo(List_t *list, Item_t *contact)
     {
         // puts("Не удалось редактировать контакт: контакт не найден!");
         // return 0;
-        RETURN_NULL_WITH_MSG("Не удалось редактировать контакт: контакт не найден!");
+        RETURN_NULL_WITH_MSG("Не удалось редактировать контакт: контакт не найден!\n");
     }
     printf("Редактирование контакта:\n\n");
     printContact(*old);
 
-    copyToContact(
-        &newValues,
-        old->lastName, old->firstName, old->patronim,
-        old->workInfo ? old->workInfo->workPlace : NULL,
-        old->workInfo ? old->workInfo->position : NULL,
-        old->numbers ? old->numbers->work : NULL,
-        old->numbers ? old->numbers->personal : NULL,
-        old->numbers ? old->numbers->home : NULL,
-        old->numbers ? old->numbers->extra : NULL,
-        old->emails, old->socialsLink);
+    newValues = createCopy(contact->contact);
+
+    if (!newValues)
+        RETURN_NULL_WITH_MSG("Не удалось редактировать контакт: не удалось создать резервную копию!\n");
 
     int choice;
     while (!exitFlag)
@@ -265,298 +261,125 @@ Item_t *editContactInfo(List_t *list, Item_t *contact)
         {
         case LAST_NAME:
         {
-            changeField(newValues.lastName, menuItems[LAST_NAME]);
+            changeField(newValues->lastName, menuItems[LAST_NAME]);
         }
         break;
         case FIRST_NAME:
-            changeField(newValues.firstName, menuItems[FIRST_NAME]);
+            changeField(newValues->firstName, menuItems[FIRST_NAME]);
             break;
         case PATRONIM:
-            changeField(newValues.patronim, menuItems[PATRONIM]);
+            changeField(newValues->patronim, menuItems[PATRONIM]);
             break;
         case WORK_PLACE:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.workInfo->workPlace, menuItems[WORK_PLACE]);
+            changeField(newValues->workInfo->workPlace, menuItems[WORK_PLACE]);
         }
         break;
         case POSITION:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.workInfo->position, menuItems[POSITION]);
+            changeField(newValues->workInfo->position, menuItems[POSITION]);
         }
         break;
         case WORK_PHONE:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.numbers->work, menuItems[WORK_PHONE]);
+            changeField(newValues->numbers->work, menuItems[WORK_PHONE]);
         }
         break;
         case PERSONAL_PHONE:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.numbers->personal, menuItems[PERSONAL_PHONE]);
+            changeField(newValues->numbers->personal, menuItems[PERSONAL_PHONE]);
         }
         break;
         case HOME_PHONE:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.numbers->home, menuItems[HOME_PHONE]);
+            changeField(newValues->numbers->home, menuItems[HOME_PHONE]);
         }
         break;
         case EXTRA_PHONE:
         {
-            if (!newValues.workInfo)
+            if (!newValues->workInfo)
             {
-                newValues.workInfo = (Work_t *)malloc(sizeof(Work_t));
-                if (!newValues.workInfo)
+                newValues->workInfo = (Work_t *)malloc(sizeof(Work_t));
+                if (!newValues->workInfo)
                 {
                     puts("Не удалось выделить память!");
                     continue;
                 }
             }
-            changeField(newValues.numbers->extra, menuItems[WORK_PHONE]);
+            changeField(newValues->numbers->extra, menuItems[WORK_PHONE]);
         }
         break;
         case EMAIL:
         {
-            printf("%s (%lu):\n", menuItems[EMAIL].name, newValues.emailCount);
-            for (size_t i = 0; i < newValues.emailCount; i++)
+            newValues = editListField(newValues, menuItems[EMAIL]);
+            if (!newValues)
             {
-                printf("%lu. %s\n", i + 1, newValues.emails[i] ? newValues.emails[i] : "(нет)");
+                puts("Не удалось изменить поле!");
+                continue;
             }
-
-            printf("\n1. Добавить email;\n2. Удалить email;\n3. Изменить email.\nВыбор: ");
-            int emailChoice;
-            if (!scanf("%d", &emailChoice) || emailChoice < 1 || emailChoice > 3)
-            {
-                printf("Некорректный выбор!\n");
-                CLEAR_BUFFER();
-                break;
-            }
-            CLEAR_BUFFER();
-
-            if (emailChoice == 1)
-            {
-                if (newValues.emailCount >= MAX_EMAILS_COUNT)
-                {
-                    printf("Достигнуто максимальное количество emails!\n");
-                    break;
-                }
-
-                char *newEmail = enterStrField(NULL, MAX_EMAIL_LENGTH);
-                if (!newEmail)
-                    break;
-
-                Contact_t *buf = contactAddEmail(&newValues, newEmail);
-                if (!buf)
-                {
-                    printf("Не удалось добавить email!\n");
-                    break;
-                }
-                newValues = *buf;
-            }
-            else if (emailChoice == 2)
-            {
-                if (newValues.emailCount == 0)
-                {
-                    printf("Нечего удалять!\n");
-                    break;
-                }
-
-                printf("Введите номер email для удаления (1-%lu): ", newValues.emailCount);
-                size_t toDelete;
-                if (!scanf("%lu", &toDelete) || toDelete < 1 || toDelete > newValues.emailCount)
-                {
-                    printf("Некорректный ввод!\n");
-                    CLEAR_BUFFER();
-                    break;
-                }
-                CLEAR_BUFFER();
-
-                Contact_t *buf = contactDeleteEmail(&newValues, toDelete);
-                if (!buf)
-                {
-                    printf("Не удалось удалить email!\n");
-                    break;
-                }
-                newValues = *buf;
-            }
-            else if (emailChoice == 3)
-            {
-                if (newValues.emailCount == 0)
-                {
-                    printf("Нечего изменять!\n");
-                    break;
-                }
-
-                printf("Введите номер email для изменения (1-%lu): ", newValues.emailCount);
-                size_t toEdit;
-                if (!scanf("%lu", &toEdit) || toEdit < 1 || toEdit > newValues.emailCount)
-                {
-                    printf("Некорректный ввод!\n");
-                    CLEAR_BUFFER();
-                    break;
-                }
-                CLEAR_BUFFER();
-
-                char *newEmail = enterStrField(newValues.emails[toEdit - 1], MAX_EMAIL_LENGTH);
-                if (newEmail)
-                {
-                    Contact_t *buf = contactEditEmail(&newValues, toEdit, newEmail);
-                    if (!buf)
-                    {
-                        printf("Не удалось удалить email!\n");
-                        break;
-                    }
-                    newValues = *buf;
-                }
-            }
-            break;
         }
-
+        break;
         case SOCIAL_LINK:
         {
-            printf("%s (%lu):\n", menuItems[SOCIAL_LINK].name, newValues.socialsCount);
-            for (size_t i = 0; i < newValues.socialsCount; i++)
+            newValues = editListField(newValues, menuItems[SOCIAL_LINK]);
+            if (!newValues)
             {
-                printf("%lu. %s\n", i + 1, newValues.socialsLink[i] ? newValues.socialsLink[i] : "(нет)");
+                puts("Не удалось изменить поле!");
+                continue;
             }
-
-            printf("\n1. Добавить socials;\n2. Удалить socials;\n3. Изменить socials.\nВыбор: ");
-            int socialsChoice;
-            if (!scanf("%d", &socialsChoice) || socialsChoice < 1 || socialsChoice > 3)
-            {
-                printf("Некорректный выбор!\n");
-                CLEAR_BUFFER();
-                break;
-            }
-            CLEAR_BUFFER();
-
-            if (socialsChoice == 1)
-            {
-                if (newValues.socialsCount >= MAX_SOCIALS_COUNT)
-                {
-                    printf("Достигнуто максимальное количество socialsLink!\n");
-                    break;
-                }
-
-                char *newSocials = enterStrField(NULL, SOCIALS_LINK_LENGTH);
-                if (!newSocials)
-                    break;
-
-                Contact_t *buf = contactAddSocial(&newValues, newSocials);
-                if (!buf)
-                {
-                    printf("Не удалось добавить socials!\n");
-                    break;
-                }
-                newValues = *buf;
-            }
-            else if (socialsChoice == 2)
-            {
-                if (newValues.socialsCount == 0)
-                {
-                    printf("Нечего удалять!\n");
-                    break;
-                }
-
-                printf("Введите номер socials для удаления (1-%lu): ", newValues.socialsCount);
-                size_t toDelete;
-                if (!scanf("%lu", &toDelete) || toDelete < 1 || toDelete > newValues.socialsCount)
-                {
-                    printf("Некорректный ввод!\n");
-                    CLEAR_BUFFER();
-                    break;
-                }
-                CLEAR_BUFFER();
-
-                Contact_t *buf = contactDeleteSocial(&newValues, toDelete);
-                if (!buf)
-                {
-                    printf("Не удалось удалить socials!\n");
-                    break;
-                }
-                newValues = *buf;
-            }
-            else if (socialsChoice == 3)
-            {
-                if (newValues.socialsCount == 0)
-                {
-                    printf("Нечего изменять!\n");
-                    break;
-                }
-
-                printf("Введите номер socials для изменения (1-%lu): ", newValues.socialsCount);
-                size_t toEdit;
-                if (!scanf("%lu", &toEdit) || toEdit < 1 || toEdit > newValues.socialsCount)
-                {
-                    printf("Некорректный ввод!\n");
-                    CLEAR_BUFFER();
-                    break;
-                }
-                CLEAR_BUFFER();
-
-                char *newSocials = enterStrField(newValues.socialsLink[toEdit - 1], MAX_EMAIL_LENGTH);
-                if (newSocials)
-                {
-                    Contact_t *buf = contactEditSocial(&newValues, toEdit, newSocials);
-                    if (!buf)
-                    {
-                        printf("Не удалось удалить socials!\n");
-                        break;
-                    }
-                    newValues = *buf;
-                }
-            }
-            break;
         }
+        break;
         case SOCIAL_LINK + 1:
         {
             puts("Значения до изменения:");
             printContact(*contact->contact);
             puts("После изменения:");
-            printContact(newValues);
+            printContact(*newValues);
             printf("Закончить редактирование (0 - нет, 1 - да, 2 - отменить изменения)? Выбор: ");
 
             while (!scanf("%d", &choice) || choice < 0 || choice > 2)
@@ -571,21 +394,30 @@ Item_t *editContactInfo(List_t *list, Item_t *contact)
             {
                 Item_t *buf = listEdit(
                     list,
-                    contact, newValues.lastName,
-                    newValues.firstName,
-                    newValues.patronim,
-                    newValues.workInfo ? newValues.workInfo->workPlace : NULL,
-                    newValues.workInfo ? newValues.workInfo->position : NULL,
-                    newValues.numbers ? newValues.numbers->work : NULL,
-                    newValues.numbers ? newValues.numbers->personal : NULL,
-                    newValues.numbers ? newValues.numbers->home : NULL,
-                    newValues.numbers ? newValues.numbers->extra : NULL,
-                    newValues.emails, newValues.socialsLink);
+                    contact, newValues->lastName,
+                    newValues->firstName,
+                    newValues->patronim,
+                    newValues->workInfo ? newValues->workInfo->workPlace : NULL,
+                    newValues->workInfo ? newValues->workInfo->position : NULL,
+                    newValues->numbers ? newValues->numbers->work : NULL,
+                    newValues->numbers ? newValues->numbers->personal : NULL,
+                    newValues->numbers ? newValues->numbers->home : NULL,
+                    newValues->numbers ? newValues->numbers->extra : NULL,
+                    newValues->emailCount, newValues->emails,
+                    newValues->socialsCount, newValues->socialsLink);
+                // free(newValues);
                 if (!buf)
+                {
+                    clearContact(newValues);
+                    free(newValues);
+                    newValues = NULL;
                     RETURN_NULL_WITH_MSG("Не удалось изменить контакт!\n");
+                }
                 contact = buf;
             }
             //*contact = newValues;
+            // free(newValues);
+            // newValues = NULL;
             exitFlag = 1;
         }
         break;
@@ -597,8 +429,14 @@ Item_t *editContactInfo(List_t *list, Item_t *contact)
         }
         }
         puts("Новые значения:");
-        printContact(newValues);
+        if (exitFlag)
+            printContact(*contact->contact);
+        else
+            printContact(*newValues);
     }
+    clearContact(newValues);
+    free(newValues);
+    newValues = NULL;
     return contact;
 }
 
@@ -607,17 +445,236 @@ char *changeField(char *oldField, const ContactField fieldAttr)
     printf("Редактирование поля \"%s\".\n", fieldAttr.name);
     printf("Старое значение: %s\n", oldField);
     printf("Введите новое значение: ");
-    // if (!enterStrField(oldField, field.fieldLength))
-    //     RETURN_NULL_WITH_MSG("Не удалось изменить поле!");
     oldField = enterStrField(oldField, fieldAttr.fieldLength);
     if (!oldField && !fieldAttr.canBeNull)
     {
         printf("Поле \"%s\" должно быть заполнено!\n", fieldAttr.name);
-        // CLEAR_BUFFER();
         printf("Введите фамилию: ");
         oldField = enterStrField(oldField, fieldAttr.fieldLength);
     }
     return oldField;
+}
+
+Contact_t* editListField(
+    Contact_t* contact,
+    const ContactField fieldAttr
+)
+{
+    if (!contact)
+        return NULL;
+
+    Contact_t* reserveCopy = createCopy(contact);
+
+    char** listField;
+    size_t subfieldCount;
+    Contact_t* (*addToListField)(Contact_t* contact, const char* newValue);
+    Contact_t* (*editAtListField)(Contact_t* contact, const size_t index, const char* newValue);
+    Contact_t* (*deleteAtListField)(Contact_t* contact, const size_t index);
+    if (fieldAttr.type == EMAIL)
+    {
+        listField = reserveCopy->emails;
+        subfieldCount = reserveCopy->emailCount;
+        addToListField = contactAddEmail;
+        editAtListField = contactEditEmail;
+        deleteAtListField = contactDeleteEmail;
+    }
+    else if (fieldAttr.type == SOCIAL_LINK)
+    {
+        listField = reserveCopy->socialsLink;
+        subfieldCount = reserveCopy->socialsCount;
+        addToListField = contactAddSocial;
+        editAtListField = contactEditSocial;
+        deleteAtListField = contactDeleteSocial;
+    }
+    else
+    {
+        clearContact(reserveCopy);
+        free(reserveCopy);
+        reserveCopy = NULL;
+        RETURN_NULL_WITH_MSG("editListField: некорректный параметр fieldAttr!\n");
+    }
+
+    bool exitSubFlag = false;
+    while (!exitSubFlag)
+    {
+        printf("%s (%lu):\n", fieldAttr.name, subfieldCount);
+
+        puts("Here");
+        fflush(stdout);
+        printf("%lu %lu %s\n", reserveCopy->emailCount, subfieldCount, listField[subfieldCount - 1]);
+        puts("Here1");
+        fflush(stdout);
+
+        if (listField)
+            for (size_t i = 0; i < subfieldCount; i++)
+            {
+                printf("%lu. %s\n", i + 1, listField[i] ? listField[i] : "(нет)");
+            }
+
+        printf("\n%s:\n1. добавить;\n"
+               "2. удалить;\n"
+               "3. изменить;\n"
+               "4. Выход обратно в меню редактирования.\n"
+               "Выбор: ",
+               fieldAttr.name);
+        int choice;
+        if (!scanf("%d", &choice) || choice < 1 || choice > 4)
+        {
+            printf("Некорректный выбор!\n");
+            CLEAR_BUFFER();
+            break;
+        }
+        CLEAR_BUFFER();
+
+        switch (choice)
+        {
+            case 1:  // добавить
+            {
+                if (subfieldCount >= fieldAttr.itemCount)
+                {
+                    printf("Достигнуто максимальное количество!\n");
+                    break;
+                }
+                printf("Введите новое значение (пустая строка для выхода): ");
+                char *newValue = enterStrField(NULL, fieldAttr.fieldLength);
+                if (!newValue)
+                    break;
+                Contact_t *buf = addToListField(reserveCopy, newValue);
+                if (!buf)
+                {
+                    printf("Не удалось добавить!\n");
+                    break;
+                }
+                reserveCopy = buf;
+                // Из-за realloc внутри обоих contactAdd...() надо перезаписывать
+                // указатель на поле, хотя указатель на контакт и тот же
+                if (fieldAttr.type == EMAIL)
+                    listField = reserveCopy->emails;
+                else if (fieldAttr.type == SOCIAL_LINK)
+                    listField = reserveCopy->socialsLink;
+                subfieldCount++;
+            }
+            break;
+            case 2:  // удалить
+            {
+                if (subfieldCount == 0)
+                {
+                    printf("Нечего удалять!\n");
+                    break;
+                }
+
+                printf("Введите номер для удаления (1-%lu): ", subfieldCount);
+                size_t toDelete;
+                if (!scanf("%lu", &toDelete) || toDelete < 1 || toDelete > subfieldCount)
+                {
+                    printf("Некорректный ввод!\n");
+                    CLEAR_BUFFER();
+                    break;
+                }
+                CLEAR_BUFFER();
+
+                Contact_t *buf = deleteAtListField(reserveCopy, toDelete - 1);
+                if (!buf)
+                {
+                    printf("Не удалось удалить!\n");
+                    break;
+                }
+                reserveCopy = buf;
+                if (fieldAttr.type == EMAIL)
+                    listField = reserveCopy->emails;
+                else if (fieldAttr.type == SOCIAL_LINK)
+                    listField = reserveCopy->socialsLink;
+                subfieldCount--;
+            }
+            break;
+            case 3:  // изменить
+            {
+                if (subfieldCount == 0)
+                {
+                    printf("Нечего изменять!\n");
+                    break;
+                }
+
+                printf("Введите номер для изменения (1-%lu): ", subfieldCount);
+                size_t toEdit;
+                if (!scanf("%lu", &toEdit) || toEdit < 1 || toEdit > subfieldCount)
+                {
+                    printf("Некорректный ввод!\n");
+                    CLEAR_BUFFER();
+                    break;
+                }
+                CLEAR_BUFFER();
+                printf("Введите новое значение (пустая строка для выхода): ");
+                char *newValue = enterStrField(listField[toEdit - 1], fieldAttr.fieldLength);
+                if (newValue)
+                {
+                    Contact_t *buf = editAtListField(reserveCopy, toEdit - 1, newValue);
+                    if (!buf)
+                    {
+                        printf("Не удалось удалить!\n");
+                        break;
+                    }
+                    reserveCopy = buf;
+                }
+            }
+            break;
+            case 4:  // выход
+            {
+                printf("%s (%lu):\n", fieldAttr.name, subfieldCount);
+
+                if (listField)
+                    for (size_t i = 0; i < subfieldCount; i++)
+                    {
+                        printf("%lu. %s\n", i + 1, listField[i] ? listField[i] : "(нет)");
+                    }
+
+                printf("Уверены, что хотите выйти? (0 - отмена, 1 - да, 2 - отменить изменения): ");
+
+                int choice1;
+                if (!scanf("%d", &choice1) || choice1 < 0 || choice1 > 2)
+                {
+                    printf("Некорректный выбор!\n");
+                    CLEAR_BUFFER();
+                    break;
+                }
+
+                if (!choice1)
+                    continue;
+                else if (choice1 == 1)
+                {
+                    if (fieldAttr.type == EMAIL)
+                    {
+                        while (deleteAtListField(contact, 0));
+                        free(contact->emails);
+                        contact->emailCount = subfieldCount;
+                        contact->emails = listField;
+                        reserveCopy->emails = NULL;
+                    }
+                    else if (fieldAttr.type == SOCIAL_LINK)
+                    {
+                        while (deleteAtListField(contact, 0));
+                        free(contact->socialsLink);
+                        contact->socialsCount = subfieldCount;
+                        contact->socialsLink = listField;
+                        reserveCopy->socialsLink = NULL;
+                    }
+                }
+                exitSubFlag = true;
+            }
+            break;
+            default:
+            {
+                puts("Некорректный выбор! Попробуйте еще раз.");
+                CLEAR_BUFFER();
+                continue;
+            }
+            break;
+        }
+    }
+    clearContact(reserveCopy);
+    free(reserveCopy);
+    reserveCopy = NULL;
+    return contact;
 }
 
 Item_t *chooseContact(const List_t list)

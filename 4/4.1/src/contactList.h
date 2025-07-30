@@ -36,7 +36,9 @@ Item_t* listAddCreate(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 );
 Item_t* listEdit(
@@ -51,7 +53,9 @@ Item_t* listEdit(
     const char* personalPhone,
     const char* homePhone,
     const char* extraPhone,
+    const size_t emailCount,
     char** emails,
+    const size_t socialsCount,
     char** socials
 );
 Item_t* listAddSorted(List_t* list, Contact_t* contact);

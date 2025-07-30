@@ -55,7 +55,7 @@ void test_listGetAt(void)
         "L1", "F1", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact1 = item1->contact;
 
@@ -64,7 +64,7 @@ void test_listGetAt(void)
         "L3", "F3", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact2 = item2->contact;
 
@@ -84,7 +84,7 @@ void test_listGetAt(void)
         "L2", "F2", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact3 = item3->contact;
 
@@ -101,7 +101,7 @@ void test_listAddSorted(void)
         "1LastName", "1FirstName", "1Patronim",
         "1Company", "1Position",
         "1234567890", "1098765432", "123456", "124680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     while (contactAddEmail(contact, "1@1.ru"));
     while (contactAddSocial(contact, "1.ru/id1"));
@@ -126,7 +126,7 @@ void test_listAddSorted(void)
         "3LastName", "3FirstName", "3Patronim",
         "3Company", "3Position",
         "3234567890", "3098765432", "323456", "324680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     while (contactAddEmail(contact, "3@3.ru"));
     while (contactAddSocial(contact, "3.ru/id3"));
@@ -141,7 +141,7 @@ void test_listAddSorted(void)
         "2LastName", "2FirstName", "2Patronim",
         "2Company", "2Position",
         "2234567890", "2098765432", "223456", "224680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     while (contactAddEmail(contact, "2@2.ru"));
     while (contactAddSocial(contact, "2.ru/id2"));
@@ -155,24 +155,24 @@ void test_listAddSorted(void)
 
 void test_listAddCreate(void)
 {
-    TEST_ASSERT_NULL(listAddCreate(NULL, "", "", "", "", "", "", "", "", "", NULL, NULL));
+    TEST_ASSERT_NULL(listAddCreate(NULL, "", "", "", "", "", "", "", "", "", 0, NULL, 0, NULL));
 
-    TEST_ASSERT_NULL(listAddCreate(&contactList, NULL, "1", "", "", "", "", "", "", "", NULL, NULL));
-    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", NULL, "", "", "", "", "", "", "", NULL, NULL));
-    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", "", "", "", "", "", "", "", "", NULL, NULL));
-    TEST_ASSERT_NULL(listAddCreate(&contactList, "", "1", "", "", "", "", "", "", "", NULL, NULL));
+    TEST_ASSERT_NULL(listAddCreate(&contactList, NULL, "1", "", "", "", "", "", "", "", 0, NULL, 0, NULL));
+    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", NULL, "", "", "", "", "", "", "", 0, NULL, 0, NULL));
+    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", "", "", "", "", "", "", "", "", 0, NULL, 0, NULL));
+    TEST_ASSERT_NULL(listAddCreate(&contactList, "", "1", "", "", "", "", "", "", "", 0, NULL, 0, NULL));
 
     contactList.length = MAX_CONTACTS_COUNT;
-    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", "1", "", "", "", "", "", "", "", NULL, NULL));
+    TEST_ASSERT_NULL(listAddCreate(&contactList, "1", "1", "", "", "", "", "", "", "", 0, NULL, 0, NULL));
     contactList.length = 0;
 
-    Item_t* created = listAddCreate(&contactList, "1", "1", "", "", "", "", "", "", "", NULL, NULL);
+    Item_t* created = listAddCreate(&contactList, "1", "1", "", "", "", "", "", "", "", 0, NULL, 0, NULL);
     TEST_ASSERT_NOT_NULL(created);
     TEST_ASSERT_NOT_NULL(created->contact);
     TEST_ASSERT_EQUAL_PTR(contactList.head, created);
     TEST_ASSERT_EQUAL(1, contactList.length);
 
-    created = listAddCreate(&contactList, "2", "2", "", "", "", "", "", "", "", NULL, NULL);
+    created = listAddCreate(&contactList, "2", "2", "", "", "", "", "", "", "", 0, NULL, 0, NULL);
     TEST_ASSERT_NOT_NULL(created);
     TEST_ASSERT_NOT_NULL(created->contact);
     TEST_ASSERT_EQUAL_PTR(contactList.tail, created);
@@ -186,7 +186,7 @@ void test_listEdit(void)
         "2LastName", "2FirstName", "1Patronim",
         "1Company", "1Position",
         "1234567890", "1098765432", "123456", "124680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact1 = item1->contact;
     while (contactAddEmail(contact1, "1@1.ru"));
@@ -197,7 +197,7 @@ void test_listEdit(void)
         "4LastName", "4FirstName", "3Patronim",
         "3Company", "3Position",
         "3234567890", "3098765432", "323456", "324680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact3 = item3->contact;
     while (contactAddEmail(contact3, "3@3.ru"));
@@ -208,7 +208,7 @@ void test_listEdit(void)
         "5LastName", "5FirstName", "2Patronim",
         "2Company", "2Position",
         "2234567890", "2098765432", "223456", "224680",
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact2 = item2->contact;
     while (contactAddEmail(contact2, "2@2.ru"));
@@ -218,21 +218,21 @@ void test_listEdit(void)
         "2LastName", "2FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     ));
 
     TEST_ASSERT_NULL(listEdit(&contactList, NULL,
         "2LastName", "2FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     ));
 
     Item_t* edited = listEdit(&contactList, item2,
         "3LastName", "3FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     TEST_ASSERT_NOT_NULL(edited);
     TEST_ASSERT_EQUAL_PTR(item2, edited);
@@ -256,7 +256,7 @@ void test_listRemoveAt(void)
         "1LastName", "1FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
 
     Contact_t* created = item1->contact;
@@ -275,21 +275,21 @@ void test_listRemoveAt(void)
         "2LastName", "2FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact2 = item2->contact;
     Item_t* item3 = listAddCreate(&contactList,
         "3LastName", "3FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact3 = item3->contact;
     Item_t* item4 = listAddCreate(&contactList,
         "4LastName", "4FirstName", NULL,
         NULL, NULL,
         NULL, NULL, NULL, NULL,
-        NULL, NULL
+        0, NULL, 0, NULL
     );
     Contact_t* contact4 = item4->contact;
 
