@@ -58,5 +58,4 @@ dkms.conf
 .vscode/
 main
 
-**/unity
 **/bin
