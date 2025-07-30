@@ -68,7 +68,7 @@ void printContact(const Contact_t contact)
         {
             if (!contact.emails[i] || !(contact.emails[i][0]))
                 break;
-            printf("%s %lu: %s\n", menuItems[EMAIL].name, i + 1, contact.emails[i]);
+            printf("%s %lu/%lu: %s\n", menuItems[EMAIL].name, i + 1, contact.emailCount, contact.emails[i]);
         }
     }
 
@@ -78,7 +78,7 @@ void printContact(const Contact_t contact)
         {
             if (!contact.socialsLink[i] || !(contact.socialsLink[i][0]))
                 break;
-            printf("%s %lu: %s\n", menuItems[SOCIAL_LINK].name, i + 1, contact.socialsLink[i]);
+            printf("%s %lu/%lu: %s\n", menuItems[SOCIAL_LINK].name, i + 1, contact.socialsCount, contact.socialsLink[i]);
         }
     }
 }
@@ -449,7 +449,7 @@ char *changeField(char *oldField, const ContactField fieldAttr)
     if (!oldField && !fieldAttr.canBeNull)
     {
         printf("Поле \"%s\" должно быть заполнено!\n", fieldAttr.name);
-        printf("Введите фамилию: ");
+        printf("Введите новое значение: ");
         oldField = enterStrField(oldField, fieldAttr.fieldLength);
     }
     return oldField;
@@ -498,12 +498,6 @@ Contact_t* editListField(
     while (!exitSubFlag)
     {
         printf("%s (%lu):\n", fieldAttr.name, subfieldCount);
-
-        puts("Here");
-        fflush(stdout);
-        printf("%lu %lu %s\n", reserveCopy->emailCount, subfieldCount, listField[subfieldCount - 1]);
-        puts("Here1");
-        fflush(stdout);
 
         if (listField)
             for (size_t i = 0; i < subfieldCount; i++)

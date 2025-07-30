@@ -420,6 +420,8 @@ Contact_t* createCopy(Contact_t* contact)
     if (!copy)
         RETURN_NULL_WITH_MSG("createCopy: не удалось создать копию!\n");
 
+    memset(copy, 0, sizeof(Contact_t));
+
     copy = copyToContact(
         copy,
         contact->lastName, contact->firstName, contact->patronim,
